@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+ * Webqem Mailcall
+ *
+ * @category    Webqem
+ * @package     Webqem_Mailcall
+ * @copyright   Copyright (c) 2012 webqem (http://www.webqem.com)
+ * @author      webqem
+-->
+
+
+<layout version="0.1.0">
+    <adminhtml_system_config_edit>
+        <reference name="head">
+            <action method="addJs"><script>jquery/jquery-1.6.3.min.js</script></action>
+            <action method="addJs"><script>jquery/jquery-noconflict.js</script></action>
+            <action method="addJs"><script>webqem/adminhtml/mailcall.js</script></action>
+        </reference>
+    </adminhtml_system_config_edit>
+</layout>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+ * Webqem Mailcall
+ *
+ * @category    Webqem
+ * @package     Webqem_Mailcall
+ * @copyright   Copyright (c) 2012 webqem (http://www.webqem.com)
+ * @author      webqem
+-->
+<config>
+    <modules>
+        <Webqem_Mailcall>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Webqem_Mailcall>
+    </modules>
+</config> 

@@ -6,28 +6,64 @@
 class Webqem_Mailcall_Model_Observer
 {
     public function setMailcallShippingMethod($observer){
-        $event = $observer->getEvent();
+        $event 	= $observer->getEvent();
         $request=$event->getRequest();
-        $quote=$event->getQuote();
-		
+        $pickup = $request->getParam('shipping_pickup',false);
+        if($pickup){
+        	Mage::getSingleton('checkout/session')->setPickup($pickup);
+        }
+        
         $shippingMethod=$request->getPost('shipping_method', '');
+        
         if($shippingMethod=='webqemmailcall_webqemmailcall'){
             $this->getCheckout()->setStepData('shipping_method','use_mailcall',1);
-	    $this->getCheckout()->setStepData('shipping_method','mailcall_payment',Mage::getStoreConfig('carriers/webqemmailcall/payment'));
+	   		$this->getCheckout()->setStepData('shipping_method','mailcall_payment',Mage::getStoreConfig('carriers/webqemmailcall/payment'));
         }else{
             $this->getCheckout()->setStepData('shipping_method','use_mailcall',0);
             $this->getCheckout()->setStepData('shipping_method','mailcall_payment','');
         }
-	//print_r($this->getCheckout()->getStepData('shipping_method'));
-       
+	
     }
-    
+    public function saveOrderAfter($evt){
+    	$order = $evt->getOrder();
+    	$pickup = Mage::getSingleton('checkout/session')->getPickup();
+    	if(isset($pickup)){
+    		$pickup['order_id'] = $order->getId();
+    		$pickupModel = Mage::getModel('webqemmailcall/pickup');
+    		$pickupModel->setData($pickup);
+    		$pickupModel->save();
+    	}
+    }
+    public function loadOrderAfter($evt){
+    	$order = $evt->getOrder();
+    	if($order->getId()){
+    		$order_id = $order->getId();
+    		$pickupCollection = Mage::getModel('webqemmailcall/pickup')->getCollection();
+    		$pickupCollection->addFieldToFilter('order_id',$order_id);
+    		$pickup = $pickupCollection->getFirstItem();
+    		$order->setPickupObject($pickup);
+    	}
+    }
+    public function loadQuoteAfter($evt)
+    {
+    	$quote = $evt->getQuote();
+    	if($quote->getId()){
+    		$quote_id = $quote->getId();
+    		$pickup = Mage::getSingleton('checkout/session')->getPickup();
+    		if(isset($pickup[$quote_id])){
+    			$data = $pickup[$quote_id];
+    			$quote->setPickupData($data);
+    		}
+    	}
+    }
     public function getCheckout(){
         return Mage::getSingleton('checkout/session');
     }
 	
     public function requestBookToMailcall($observer){
         $useMailcall=$this->getCheckout()->getStepData('shipping_method','use_mailcall');
+        $order = $observer->getOrder();
+        
         if($useMailcall){
                 $event = $observer->getEvent();
                 $order=$event->getOrder();
@@ -40,6 +76,17 @@ class Webqem_Mailcall_Model_Observer
                               ->bookXmlRequest($quote);
 
         }
+        
+        if ($order->getShippingMethod() == 'timeslot_timeslot') {
+            $event = $observer->getEvent();
+                $order=$event->getOrder();
+                $quote=$event->getQuote();
+                $timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
+                $timeslotsModel->setOrder($order)
+                              ->bookXmlRequest($quote);
+            
+        }
+
         return;
     }
 	
@@ -58,6 +105,7 @@ class Webqem_Mailcall_Model_Observer
 				Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO => Mage::helper('salesrule')->__('For Want it Now Shipping Method'),
             ),
         ));
+		
 	}
 }
 ?>

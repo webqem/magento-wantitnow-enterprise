@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+	<checkout_onepage_index>
+	    <reference name='head'>
+	        <reference name="head">
+	            <action method="addItem"><type>js</type><name>webqem/jquery-1.8.2.js</name></action>
+	            <action method="addItem"><type>js</type><name>webqem/jquery.ui.core.js</name></action>
+	            <action method="addItem"><type>js</type><name>webqem/jquery.ui.datepicker.js</name></action>
+	            <action method="addItem"><type>js</type><name>webqem/noconflict.js</name></action>
+	            <action method="addCss"><stylesheet>webqem/jquery-ui-1.9.1.custom.min.css</stylesheet></action>
+	        </reference>
+	    </reference> 
+	    <reference name='checkout.onepage.shipping_method.available'>
+	        <action method='setTemplate'><template>webqem/checkout/onepage/shipping_method/available.phtml</template></action>
+	    </reference>
+	</checkout_onepage_index>
+	<checkout_onepage_shippingmethod>
+	    <reference name='root'>
+	        <action method='setTemplate'><template>webqem/checkout/onepage/shipping_method/available.phtml</template></action>
+	    </reference>
+	</checkout_onepage_shippingmethod>
+</layout> 

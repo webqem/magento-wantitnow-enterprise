@@ -1,0 +1,33 @@
+<?php 
+	$_code=$this->getMethodCode();
+	$carrier = $this->getMethodInstance();
+	$pickupData = $this->getQuote()->getPickupData();
+	$_rate = $this->getRate();
+	if(!isset($pickupData['store']))
+	{
+		$pickupData['store'] = -1;
+	}
+	if(!isset($pickupData['name']))
+	{
+		$pickupData['name'] = '';
+	}
+?>
+<ul id="shipping_form_<?php echo $_rate->getCode() ?>" style="display:none;">
+ 	<?php if($this->getConfigData('dispatch_sms')):?>
+    <li>
+    	<span class="input-box">
+            <input type="checkbox" value="1" name="shipping_pickup[sms_dispatched]" />
+        </span>
+        <label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('SMS when my package is dispatched') ?></label>
+        
+     </li>
+   	<?php endif;?>
+   	<?php if($this->getConfigData('delivery_sms')):?>
+     <li>
+     	<span class="input-box">
+        	<input type="checkbox" value="1" name="shipping_pickup[sms_time_away]" />
+        </span>
+        <label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('SMS when my package is 20 minutes away') ?></label>
+    </li>
+    <?php endif;?>
+</ul>

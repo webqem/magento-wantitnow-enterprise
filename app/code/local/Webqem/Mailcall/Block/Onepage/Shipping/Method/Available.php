@@ -17,10 +17,17 @@ class Webqem_Mailcall_Block_Onepage_Shipping_Method_Available extends Mage_Check
             $mailcall_url=$this->getUrl('media/wantitnow',array('_secure'=>true));
             $mailcall_url=str_replace('/index.php','',$mailcall_url);
             $logo='<img alt="'.Mage::helper('webqemmailcall')->__('Want it now').'" src="'.$mailcall_url.Mage::getStoreConfig('carriers/'.$carrierCode.'/display_logos').'.png">';
-                       //commented and changed by Mike @ Mailcall 02/08/2012
-                        //return $logo;
-                        echo $logo;
-        }else{
+            
+            echo $logo;
+        }else if ($carrierCode=='timeslot') {
+        	$mailcall_url=$this->getUrl('media/wantitnow',array('_secure'=>true));
+        	$mailcall_url=str_replace('/index.php','',$mailcall_url);
+        	$logo='<img alt="'.Mage::helper('webqemmailcall')->__('Want it now Timeslot').'" src="'.$mailcall_url.Mage::getStoreConfig('carriers/'.$carrierCode.'/display_logos').'.png">';
+        	
+        	echo $logo;
+        }
+        else{
+        
             if ($name = Mage::getStoreConfig('carriers/'.$carrierCode.'/title')) {
                 //commented and changed by Mike @ Mailcall 02/08/2012
                 //return $logo;

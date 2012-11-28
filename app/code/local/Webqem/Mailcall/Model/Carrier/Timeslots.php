@@ -1,6 +1,6 @@
 <?php
 /**
- * Webqem Mailcall
+ * Webqem Timeslots
  *
  * @category    Webqem
  * @package     Webqem_Mailcall
@@ -8,7 +8,7 @@
  * @author      webqem
  */
 
-class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier_Abstract 
+class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrier_Abstract 
 	implements Mage_Shipping_Model_Carrier_Interface{
 	
     /**
@@ -23,7 +23,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     protected $_filePath = '/var/mailcall/';
     protected $_fileName = 'pricelist.xml';
     protected $_updatePriceDays = 7;
-    protected $_code = 'webqemmailcall';
+    protected $_code = 'timeslot';
     protected $_request = null;
     protected $_result = null;
     protected $_errors = array();
@@ -34,13 +34,12 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     protected $_errorReportEmail='it@mailcall.com.au';
     protected $_order;
     
-	
     /**
      * Get block pickup to shipping method
      */
     public function getFormBlock()
     {
-    	return 'webqemmailcall/wantitnow_pickup';
+    	return 'webqemmailcall/timeslots_pickup';
     } 
     
     /**
@@ -50,7 +49,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
      * @return Mage_Shipping_Model_Rate_Result
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request) {
-
+		
         if (!$this->getConfigFlag('active')) {
             return false;
         }
@@ -62,9 +61,9 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         }
         
         $this->_result = $this->_getQuotes();
-
+		
         $this->_updateFreeMethodQuote($request);
-
+		
         return $this->getResult();
     }
     
@@ -650,7 +649,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
 			}
 			
 			$service = $this->_code;
-//            $data['term'] = $desc . ' ('.$shipXml->DeliveryDate.')';
+			//$data['term'] = $desc . ' ('.$shipXml->DeliveryDate.')';
             $data['term'] = $desc;
             $data['price_total'] = $this->getMethodPrice($totalEstimate, $service);
             $this->_mailcallRates[] = array('service' => $service, 'data' => $data);
@@ -690,6 +689,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
             return Mage::getSingleton('checkout/session');
     }
     
+    
     public function bookXmlRequest($quote) {
         $order=$this->getOrder();
         $address=$order->getShippingAddress();
@@ -703,29 +703,23 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         }else{
             $streetStr=$street;
         }
-        
+        $pickup = Mage::getSingleton('checkout/session')->getPickup();
         $xml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="book" version="1.4" />');
-        $nowTime=$this->_getLocale()->storeTimeStamp();
-        $chcekRt=$this->getConfigData('check_readytime');
-        $configRt=explode(',',$this->getConfigData('readytime'));
-        $readytime=date('Hi',$nowTime);
-        if(count($configRt)>1){
-            if($chcekRt==1){
-                $readytime=$configRt[0].$configRt[1];
-            }else if($chcekRt==2){
-                $nowTime=$nowTime+($configRt[0]*3600)+($configRt[1]*60);
-                $readytime=date('Hi',$nowTime);
-            }
-        }
+
+        $timeslotModel = Mage::getModel('webqemmailcall/timeslot')->load($pickup['timeslot']);
+        $readytime= str_replace(':', '', $timeslotModel->getTimeStart());
+    
         $suburb=$this->getCheckout()->getStepData('shipping_method','mailcall_suburb');
         $homeaddress=$this->getCheckout()->getStepData('shipping_method','mailcall_homeaddress');
         $homepostal=$this->getCheckout()->getStepData('shipping_method','mailcall_homepostal');
         $apikey=$this->getCheckout()->getStepData('shipping_method','mailcall_apikey');
         
         //echo $this->getConfigData('fromaddress');
+        
+        
         $getQuote = $xml->addChild('job');
         $requestor = $getQuote;
-        $requestor->addChild('date', date('Ymd',$nowTime));
+        $requestor->addChild('date', date('Ymd',strtotime($pickup['timeslot_date'])));        
         $requestor->addChild('fromcompany', $this->getConfigData('fromcompany'));
         $requestor->addChild('fromaddress1', $homeaddress);//$this->getConfigData('fromaddress')
         $requestor->addChild('fromcontact', $this->getConfigData('fromcontact'));
@@ -738,7 +732,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         $requestor->addChild('tophone', $address->getTelephone());
         $requestor->addChild('tosuburb', $address->getCity());
         $requestor->addChild('topostcode', $address->getPostcode());
-        $requestor->addChild('service', 'STD');
+        $requestor->addChild('service', 'RUNS');
         $requestor->addChild('vehicle', 'C');
         $requestor->addChild('weight', $order->getWeight());
         $requestor->addChild('weightunits', 'kg');
@@ -754,7 +748,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         $options->addChild('custdelimminentsms', isset($pickup['sms_time_away']) ? 'Y' : 'N' );
         $options->addChild('custsmsphone',$address->getTelephone());
         $options->addChild('warehousesmsphone', $this->getConfigData('sms_contact_number'));
-        
+         
         $items = $requestor->addChild('items');
         $i = 0;
         foreach ($order->getAllItems() as $_item) {
@@ -784,14 +778,17 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         $request = $xml->asXML();
         $request = array('key' => $apikey, 'xml' => $request);
         $debugData['request_book'] = $request;
-        
+//        Mage::log($requestor);die;
         $privatelink='';
         try {
+            
             for($i=1;$i<=$this->_retryTimes;$i++){
                 //request book
                 $responseBody=$this->_submitPost($request);
                 if(!empty($responseBody)) break;
             }
+            Mage::log($requestor);
+            Mage::log($responseBody);
             //$i=5;$responseBody="";
             //contact api error
             if($i>=5 && empty($responseBody)){
@@ -855,7 +852,6 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         
         return $res;
     }
-    
     
    //Modified by Mike @ Mailcall 01/06/2012
     protected function _parseBookXmlResponse($response,$privatelink,$wintracklink,$linenumber,$mobileauthcode) {
@@ -1126,6 +1122,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         $io->streamClose();
         return $xml;
     }
+    
     public function getAllowedMethods()
     {
         return array($this->_code=>$this->getConfigData('title'));

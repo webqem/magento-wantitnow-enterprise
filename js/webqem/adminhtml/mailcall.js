@@ -10,14 +10,17 @@
 jQuery(function(){
     var baseUrl=top.location.href.split('index.php');
     var baseMediaUrl=baseUrl[0]+"media/wantitnow/";
-    var displayLogosSelect=jQuery('#carriers_webqemmailcall_display_logos');
+    
+    //mailcall
+    var displayLogosSelect				= jQuery('#carriers_webqemmailcall_display_logos');
+    
+    
     displayLogosSelect.after('<p id="mailcall_logo_overview"></p>');
     
     var logoOverview=jQuery('#mailcall_logo_overview');
     function changeLogoImg(){
         var logoImg='<img src="'+baseMediaUrl+displayLogosSelect.val()+'.png" alt="Want it now">';
         logoOverview.html(logoImg);
-        //jQuery('#carriers_webqemmailcall_title').val(logoImg+' <span style="display:none;">Mail Call</span>');
     }
     
     changeLogoImg();
@@ -25,6 +28,23 @@ jQuery(function(){
         changeLogoImg();
     });
     
+    //timeslots
+    var displayLogosSelectTimeslotes 	= jQuery('#carriers_timeslot_display_logos');
+    displayLogosSelectTimeslotes.after('<p id="timeslotes_logo_overview"></p>');
+    var logoOverviewTimeslots = jQuery('#timeslotes_logo_overview');
+    function changeLogoImgTimeslots(){
+        var logoImg='<img src="'+baseMediaUrl+displayLogosSelectTimeslotes.val()+'.png" alt="Want it now">';
+        logoOverviewTimeslots.html(logoImg);
+    }
+    
+    changeLogoImgTimeslots();
+    displayLogosSelectTimeslotes.change(function(){
+    	changeLogoImgTimeslots();
+    });
+    
+    
+    
+    //mailcall use fixed cost
     var usefixedcost=jQuery('#carriers_webqemmailcall_usefixedcost');
     usefixedcost.change(function(){
         changeFixedFields();
@@ -47,6 +67,30 @@ jQuery(function(){
         }
     }
     changeFixedFields();
+    
+    //timeslots use fixed cost
+    var usefixedcostTimeSlots=jQuery('#carriers_timeslot_usefixedcost');
+    usefixedcostTimeSlots.change(function(){
+    	changeFixedFieldsTimeslots();
+    });
+    function changeFixedFieldsTimeslots(){
+        var selectedVal=usefixedcostTimeSlots.find("option:selected").val();
+        var selectedDisabled=usefixedcostTimeSlots.attr('disabled');
+        if(selectedVal==0){
+            jQuery('#carriers_timeslot_withinkms').attr('disabled',true);
+            jQuery('#carriers_timeslot_fixedcost').attr('disabled',true);
+            jQuery('#carriers_timeslot_display_wantitnow').attr('disabled',true);
+        }else{
+            if(!selectedDisabled){
+                jQuery('#carriers_timeslot_withinkms').attr('disabled',false);
+                jQuery('#carriers_timeslot_fixedcost').attr('disabled',false);
+                jQuery('#carriers_timeslot_display_wantitnow').attr('disabled',false);
+            }
+            
+        }
+    }
+    changeFixedFieldsTimeslots();
+    
     
     var mailcallTable=jQuery('#carriers_webqemmailcall');
     var checkReadyTime=jQuery('#carriers_webqemmailcall_check_readytime');

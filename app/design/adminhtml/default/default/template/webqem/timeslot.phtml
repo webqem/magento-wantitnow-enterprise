@@ -1,0 +1,160 @@
+<?php 
+/**
+ * Timeslot template
+ */
+?>
+<style type="text/css">
+	.timeslot_day{
+		width:200px;
+	}
+	.dynamic-grid_segment td{
+		padding:5px 0;
+	}
+</style>
+<script type="text/javascript">
+	String.prototype.str_replace = function(search, replace) {
+	    return this.split(search).join(replace);
+	}
+	//< ![CDATA[
+	Validation.add('validate-time-start','Timeslots cannot overlap',function(v, elm){
+		var checkError = true;
+		var currentIndex = elm.id.substr(elm.id.length-1,1);
+		var currentTime = parseFloat(v.str_replace(':', '.'));
+		
+		 $$('select.validate-time-end').each(function(item) {
+
+			var checkedIndex = item.id.substr(item.id.length-1,1);
+			var checkedEnd = parseFloat(item.value.str_replace(':', '.'));
+			var checkedTimeStart = parseFloat($('time_start_'+checkedIndex).value.str_replace(':', '.'));
+
+			
+			if ('time_end_'+currentIndex != item.id) {
+				if ((currentTime<checkedEnd) && (checkedTimeStart<=currentTime)) {
+					console.log(currentTime);
+					console.log(checkedTimeStart + ' - ' + checkedEnd);
+					checkError = false;
+				}
+			}
+	
+		 });
+		return checkError;
+	});
+	Validation.add('validate-time-end','Timeslot period length invalid',function(v, elm){ 
+		
+		var index = elm.id.substr(elm.id.length-1,1);
+		
+		var timeStart = $('time_start_'+index).value;
+		var valueTimeEnd = parseFloat(v.str_replace(':', '.'));
+		var valueTimeStart = parseFloat(timeStart.str_replace(':', '.'));
+		
+		var regionTime = valueTimeEnd-valueTimeStart;
+		
+		if ((valueTimeStart==valueTimeEnd) || (regionTime<3) || (regionTime>6)) {
+			 return false;   
+		}
+		return true;  
+	});
+	var coutNumberTimeslot = <?php if($this->getDataEdit()) echo count($this->getDataEdit()); else echo 0;?>;
+	var initCountTimeslot = <?php if($this->getDataEdit()) echo count($this->getDataEdit()); else echo 0;?>;
+	
+	function removeSegment(numberSegment, idRemove) {
+		if (!isNaN(idRemove)) {
+			var deleteIds = $('delete_ids').getValue() +','+idRemove;
+			$('delete_ids').setValue(deleteIds);
+		}
+		Element.remove("segment_"+numberSegment);
+		coutNumberTimeslot--;
+	}
+	//timeslot_hour
+	function addNewTimeslotSegment() {
+		initCountTimeslot++;
+		var firstStepTemplate = '<tr id="segment_'+initCountTimeslot+'">'+
+				    '<td><input type="text" class="required-entry input-text" id="segment_description_'+initCountTimeslot+'" name="segment[segment_'+initCountTimeslot+'][description]" value=""></td>'+
+				    '<td><select name="segment[segment_'+initCountTimeslot+'][from_time]" class="validate-time-start" id="time_start_'+initCountTimeslot+'"><?php echo $this->getOptionHour()?></select></td>'+
+				    '<td class="opt-req"><select name="segment[segment_'+initCountTimeslot+'][to_time]" class="validate-time-end" id="time_end_'+initCountTimeslot+'"><?php echo $this->getOptionHour()?></select></td>'+
+				    '<td>'+
+				    '<button title="Delete" type="button" class="scalable delete delete-option" onclick="removeSegment('+initCountTimeslot+')">'+
+				    '<span>'+
+				    '<span> '+
+				    '<span>  Delete </span>'+
+				    '</span> '+
+				    '</span>'+
+				    '</button>'+
+				    '</td>'+
+					'</tr>';	
+		coutNumberTimeslot++;
+		
+		if (coutNumberTimeslot>4) {
+			coutNumberTimeslot--;
+			alert('Maximum timeslots per day: 4');
+			return;
+		}
+		$('timeslot_header').insert({after:firstStepTemplate});
+	}
+	//]]>
+</script>
+<input type="hidden" value="" name="delete_ids" id="delete_ids" />
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->getTabTitle()?></h4>
+    </div>
+    <div id="group_timeslot" class="box">
+    	<div class="hor-scroll">
+    		<table class="dynamic-grid" cellspacing="0" cellpadding="0">
+    			<tbody>
+    				<tr>
+    					<td width="100"><?php echo $this->__('Day')?></td>
+    					<td width="200"><?php echo $this->getOptionday()?></td>
+    				</tr>
+    			</tbody>
+    		</table>	
+    	</div>
+    </div>
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->__('Timeslot Segment')?></h4>
+    </div>
+    <div id="group_timeslot" class="box">
+    	<div class="hor-scroll">
+    		<table class="dynamic-grid_segment" cellspacing="0" cellpadding="0">
+    			<tr id="timeslot_header">
+    				<th width="200px">Description</th>
+					<th style="min-width: 100px">From time</th>
+					<th style="min-width: 100px">To time</th>
+					<th>
+    					<button type="button" class="scalable add" id="add_new_timeslot_segment" onclick="addNewTimeslotSegment()"> 
+				   			<span>
+				   				<span>
+				   					<span>Add Segment Time</span>
+				   				</span>
+				   			</span>
+				   		</button>
+    				</th>
+    			</tr>
+    			<?php $count = 1; if(count($this->getDataEdit())>0) : ?>
+    				<?php foreach ($this->getDataEdit() as $segement) : ?>
+    					  <tr id="segment_<?php echo $count;?>">
+						    	<td>
+						    		<input type="text" class="required-entry input-text" id="segment_description_<?php echo $count;?>" name="segment[<?php echo $segement->getId()?>][description]" value="<?php echo $segement->getDescription()?>">
+						    	</td>
+						    	<td>
+						    		<select name="segment[<?php echo $segement->getId()?>][from_time]" class="validate-time-start" id="time_start_<?php echo $count;?>" ><?php echo $this->getOptionHour($segement->getTimeStart())?></select>
+						    	</td>
+						    	<td class="opt-req">
+						    		<select name="segment[<?php echo $segement->getId()?>][to_time]" class="validate-time-end" id="time_end_<?php echo $count;?>"><?php echo $this->getOptionHour($segement->getTimeEnd())?></select>
+						    	</td>
+						    	<td>
+							    	<button title="Delete" type="button" class="scalable delete delete-option" onclick="removeSegment(<?php echo $count;?>, <?php echo $segement->getId()?>)">
+									    <span>
+										    <span>
+										    	<span>Delete</span>
+										    </span>
+									    </span>
+								    </button>
+						    	</td>
+							</tr>
+    				<?php $count++; endforeach;?>
+    			<?php endif;?>
+    		</table>
+    	</div>
+    </div>
+</div>

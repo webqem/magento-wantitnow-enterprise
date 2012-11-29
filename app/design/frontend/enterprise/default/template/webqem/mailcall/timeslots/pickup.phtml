@@ -8,9 +8,11 @@
 	.sp-methods dd li {
 	    width: 470px;
 	}
-	.timeslot_wrapper{
+	#timeslot_phone_wrapper, .timeslot_wrapper{
 		overflow:hidden;
 	}
+	#timeslot_phone_wrapper label, #timeslot_phone_wrapper span{float:left;} 
+	#timeslots_sms{margin-left:10px;}
 	.timeslot_wrapper label, .timeslot_wrapper span{float:left;}
 </style>
 <?php 
@@ -20,9 +22,6 @@
 	$arrHolidays = $this->getDisableDate(true);
 	
 	$maxDate = date("m/d/Y");
-	if (in_array($maxDate, $arrHolidays)){
-		$numberday++;
-	}
 	
 	if ($numberday) {
 		if ((date('N')+$numberday)>=7) {
@@ -30,8 +29,18 @@
 			
 		}
 		
-		$maxDate = strtotime ( "+$numberday day" , strtotime ( $maxDate ) ) ;
-		$maxDate = date ( "m/d/Y" , $maxDate );
+		$maxDateStamp = strtotime ( "+$numberday day" , strtotime ( $maxDate ) ) ;
+		
+		$timeNow = Mage::getSingleton('core/date')->timestamp();
+		foreach ($arrHolidays as $holiday) {
+			
+			if (strtotime($holiday)>=$timeNow && strtotime($holiday)<=$maxDateStamp) {
+				$numberday++;
+			}
+		}
+		
+		$maxDateStamp = strtotime ( "+$numberday day" , strtotime ( $maxDate ) ) ;
+		$maxDate = date ( "m/d/Y" , $maxDateStamp );
 	}
 	
 ?>
@@ -41,13 +50,16 @@
 	
 	function nationalDays(date) {
 		 var m = date.getMonth(), d = date.getDate(), y = date.getFullYear();
+		 
 		  for (i = 0; i < disabledDays.length; i++) {
-		    if(jQuery.inArray((m+1) + '/' + d + '/' + y,disabledDays) != -1 || new Date() > date) {
+			
+			if(jQuery.inArray((m+1) + '/' + d + '/' + y,disabledDays) != -1) {
+				
 		      return [false];
 		    }
 		  }
-		 //console.log((m+1) + '/' + d + '/' + y);
-		  return [true];
+		 
+		 return [true];
 	}
 	function noWeekendsOrHolidays(date) {
 	  	var noWeekend = jQuery.datepicker.noWeekends(date);
@@ -71,7 +83,35 @@
 					    });
 			    } 
 			});
-		
+		jQuery.ajax({
+	        url: "<?php echo $this->getUrl('webqemmailcall/shipping/getTimeslot')?>",
+	        type: "post",
+	        data: { day: '<?php echo date('m/d/Y');?>'},
+	        beforeSend: function ( xhr ) {
+	            jQuery('#timeslot_loading').show();
+	            jQuery('#timeslot_datepicker').val('<?php echo date('m/d/Y');?>');
+	         },
+	        success: function(response, textStatus, jqXHR){
+	            
+	            jQuery('#timeslot_segment').html(response);
+	            jQuery('#timeslot_loading').hide();
+	        }
+	    });
+		var countMailcallSms = 0;
+		jQuery('#shipping_form_timeslot_timeslot input:checkbox').click(
+			 function(e){
+			    if(jQuery(this).is(':checked')) {
+			    	countMailcallSms++;
+			    } else {
+			    	countMailcallSms--;
+			    }
+			    if (countMailcallSms>0) {
+					jQuery('#timeslot_phone_wrapper').show();
+			    } else {
+			    	jQuery('#timeslot_phone_wrapper').hide();
+			    }
+			 }
+		);
 	});
 	
 	</script>
@@ -120,5 +160,13 @@
         </span>
         <label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('SMS when my package is 20 minutes away') ?></label>
     </li>
+    <?php endif;?>
+    <?php if($this->getConfigData('dispatch_sms') || $this->getConfigData('delivery_sms')):?>
+    <li id="timeslot_phone_wrapper" style="display:none;">
+     	<label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('Phone Number') ?></label>
+     	<span class="input-box">
+        	<input type="text" value="<?php echo $this->getAddress()->getTelephone()?>" name="shipping_pickup[phone_number]" class="required-entry input-text" id="timeslots_sms"/>
+        </span>
+    </li>	
     <?php endif;?>
 </ul>

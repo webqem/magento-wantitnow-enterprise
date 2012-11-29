@@ -750,7 +750,7 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         $options->addChild('warehousesms',  $this->getConfigData('warehouse_sms_nofify') ? 'Y' : 'N');
         $options->addChild('custdeldispatchsms', isset($pickup['sms_dispatched']) ? 'Y' : 'N' );
         $options->addChild('custdelimminentsms', isset($pickup['sms_time_away']) ? 'Y' : 'N' );
-        $options->addChild('custsmsphone',$address->getTelephone());
+        $options->addChild('custsmsphone',$pickup['phone_number']);
         $options->addChild('warehousesmsphone', $this->getConfigData('sms_contact_number'));
          
         $items = $requestor->addChild('items');

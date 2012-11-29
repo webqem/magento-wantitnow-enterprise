@@ -705,6 +705,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         }else{
             $streetStr=$street;
         }
+        $pickup = Mage::getSingleton('checkout/session')->getPickup();
         
         $xml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="book" version="1.4" />');
         $nowTime=$this->_getLocale()->storeTimeStamp();
@@ -756,7 +757,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         $options->addChild('warehousesms',  $this->getConfigData('warehouse_sms_nofify') ? 'Y' : 'N');
         $options->addChild('custdeldispatchsms', isset($pickup['sms_dispatched']) ? 'Y' : 'N' );
         $options->addChild('custdelimminentsms', isset($pickup['sms_time_away']) ? 'Y' : 'N' );
-        $options->addChild('custsmsphone',$address->getTelephone());
+        $options->addChild('custsmsphone',$pickup['phone_number']);
         $options->addChild('warehousesmsphone', $this->getConfigData('sms_contact_number'));
         
         $items = $requestor->addChild('items');

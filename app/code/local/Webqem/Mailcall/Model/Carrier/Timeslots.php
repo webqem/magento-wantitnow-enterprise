@@ -692,6 +692,8 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
     
     public function bookXmlRequest($quote) {
         $order=$this->getOrder();
+        //added order number variable for use in REFERENCE XML by Mike @ Mailcall 28/11/2012
+        $orderId=$order->getData('increment_id');
         $address=$order->getShippingAddress();
         $street=$address->getStreet();
         $streetStr='';
@@ -728,7 +730,8 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         $requestor->addChild('frompostcode', $homepostal);//$this->getConfigData('frompostcode')
         $requestor->addChild('tocompany', $address->getCompany());
         $requestor->addChild('toaddress1', $streetStr);
-        $requestor->addChild('tocontact', $address->getFirstName().' '.$address->getLastName());
+        //added lowercase Firstname / Lastname by Mike @ Mailcall 28/11/2012
+        $requestor->addChild('tocontact', $address->getFirstname().' '.$address->getLastname());
         $requestor->addChild('tophone', $address->getTelephone());
         $requestor->addChild('tosuburb', $address->getCity());
         $requestor->addChild('topostcode', $address->getPostcode());
@@ -739,7 +742,8 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         $requestor->addChild('sizeclass', 'Archive Box');
         $requestor->addChild('readytime', $readytime);
         $requestor->addChild('driverinstructions', '');
-        $requestor->addChild('reference', '');
+        //added order number to REFERENCE by Mike @ Mailcall 28/11/2012
+        $requestor->addChild('reference', $orderId);
         $requestor->addChild('consignment', '');
         
         $options = $requestor->addChild('options');

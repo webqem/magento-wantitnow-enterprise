@@ -26,14 +26,11 @@
 	if ($numberday) {
 		if ((date('N')+$numberday)>=7) {
 			$numberday = $numberday+2;
-			
 		}
-		
 		$maxDateStamp = strtotime ( "+$numberday day" , strtotime ( $maxDate ) ) ;
 		
 		$timeNow = Mage::getSingleton('core/date')->timestamp();
 		foreach ($arrHolidays as $holiday) {
-			
 			if (strtotime($holiday)>=$timeNow && strtotime($holiday)<=$maxDateStamp) {
 				$numberday++;
 			}
@@ -42,6 +39,8 @@
 		$maxDateStamp = strtotime ( "+$numberday day" , strtotime ( $maxDate ) ) ;
 		$maxDate = date ( "m/d/Y" , $maxDateStamp );
 	}
+	$maxDate = date('d/m/Y', strtotime($maxDate));
+	
 	
 ?>
 <script>
@@ -53,7 +52,7 @@
 		 
 		  for (i = 0; i < disabledDays.length; i++) {
 			
-			if(jQuery.inArray((m+1) + '/' + d + '/' + y,disabledDays) != -1) {
+			if(jQuery.inArray( d + '/' + (m+1) + '/' + y,disabledDays) != -1) {
 				
 		      return [false];
 		    }
@@ -66,7 +65,7 @@
 	  	return noWeekend[0] ? nationalDays(date) : noWeekend;
 	}
 	jQuery(function() {
-		jQuery( "#timeslot_datepicker" ).datepicker({beforeShowDay: noWeekendsOrHolidays, minDate: new Date(),maxDate: '<?php echo $maxDate?>',
+		jQuery( "#timeslot_datepicker" ).datepicker({dateFormat: 'dd/mm/yy' ,beforeShowDay: noWeekendsOrHolidays, minDate: new Date(),maxDate: '<?php echo $maxDate?>',
 				onSelect: function(dates) { 
 					jQuery.ajax({
 					        url: "<?php echo $this->getUrl('webqemmailcall/shipping/getTimeslot')?>",
@@ -86,10 +85,10 @@
 		jQuery.ajax({
 	        url: "<?php echo $this->getUrl('webqemmailcall/shipping/getTimeslot')?>",
 	        type: "post",
-	        data: { day: '<?php echo date('m/d/Y');?>'},
+	        data: { day: '<?php echo date('d/m/Y');?>'},
 	        beforeSend: function ( xhr ) {
 	            jQuery('#timeslot_loading').show();
-	            jQuery('#timeslot_datepicker').val('<?php echo date('m/d/Y');?>');
+	            jQuery('#timeslot_datepicker').val('<?php echo date('d/m/Y');?>');
 	         },
 	        success: function(response, textStatus, jqXHR){
 	            
@@ -131,17 +130,16 @@
 ?>
 <ul id="shipping_form_<?php echo $_rate->getCode() ?>" style="display:none;">
     <li class="timeslot_wrapper">
+    	<label for="<?php echo $_code ?>_store" class="shipping_date"><?php echo $this->__("Date") ?></label>
+        <span class="input-box">
+        	<input type='text' name='shipping_pickup[timeslot_date]' class='required-entry input-text' value='<?php echo $pickupData['name']?>' id="timeslot_datepicker"/>
+        	<img id="timeslot_loading" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'webqem/ajax-loader.gif'?>" style="display:none"/>
+        </span>
         <label for="<?php echo $_code ?>_store" class="shipping_time_slot"><?php echo $this->__('Timeslot') ?></label>
         <span id="timeslot_segment">
             <select class="required-entry" name="shipping_pickup[day]" style="width:170px">
             	<option value="">-- Please select date --</option>
             </select>
-        </span>
-        <label for="<?php echo $_code ?>_store" class="shipping_date"><?php echo $this->__("Date") ?></label>
-        <span class="input-box" style="float:right">
-        	<input type='text' name='shipping_pickup[timeslot_date]' class='required-entry input-text' value='<?php echo $pickupData['name']?>' id="timeslot_datepicker"/>
-        	
-        	<img id="timeslot_loading" src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'webqem/ajax-loader.gif'?>" style="display:none"/>
         </span>
     </li>
     <?php if($this->getConfigData('dispatch_sms')):?>

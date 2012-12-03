@@ -688,10 +688,9 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
     protected function getCheckout(){
             return Mage::getSingleton('checkout/session');
     }
-    
-    
-    public function bookXmlRequest($quote) {
-        $order=$this->getOrder();
+    // get xml request to save
+    public function getbookXmlRequest($quote) {
+    	$order=$this->getOrder();
         //added order number variable for use in REFERENCE XML by Mike @ Mailcall 28/11/2012
         $orderId=$order->getData('increment_id');
         $address=$order->getShippingAddress();
@@ -775,14 +774,27 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
             }
         }
 
-        $requestor->addChild('quantity', $quote->getItemsQty());
+        $requestor->addChild('quantity', $i);
         $requestor->addChild('oktoleave', 'N');
         $requestor->addChild('echo', 'N');
         
         $request = $xml->asXML();
-        $request = array('key' => $apikey, 'xml' => $request);
-        $debugData['request_book'] = $request;
-//        Mage::log($requestor);die;
+        $request = serialize(array('key' => $apikey, 'xml' => $request));
+    	return $request;
+    	 
+    }
+    
+    public function bookXmlRequest($order) {
+    	$requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
+    	->addFieldToFilter('order_id', $order->getIncrementId())
+    	->getFirstItem();
+    	
+    	$request = unserialize($requestModel->getRequest());
+    	$debugData['request_book'] = $request;
+    	
+    	Mage::log("Mail call timeslots XML request");
+    	Mage::log($request);
+    	
         $privatelink='';
         try {
             
@@ -848,7 +860,11 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
             $debugData['result'] = array('error' => $e->getMessage(), 'code' => $e->getCode());
             $responseBody = '';
         }
-
+        //delete request tmp 
+        $requestXml = Mage::getModel('webqemmailcall/request');
+        $requestXml->setId($requestModel->getId());
+        $requestXml->delete();
+        
         $this->_debug($debugData);
         //Modified by Mike @ Mailcall 01/06/2012
         $res=$this->_parseBookXmlResponse($responseBody,$privatelink,$wintracklink,$linenumber,$mobileauthcode);
@@ -903,11 +919,11 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
              $num++;
         }
         if(!empty($errorMsg)){
-            $result['success']  = false;
+            /* $result['success']  = false;
             $result['error']    = true;
             $result['error_messages'] = 'Error:'.$errorMsg;
             echo Zend_Json::encode($result);
-            exit;
+            exit; */
         }else{
             //Modified by Mike @ Mailcall 01/06/2012
             $this->sendNewOrderEmailToCustomer($privatelink,$wintracklink,$linenumber,$mobileauthcode);

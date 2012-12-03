@@ -44,6 +44,15 @@ $installer->run("
 		PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ");
+$installer->run("
+		CREATE TABLE IF NOT EXISTS {$this->getTable('webqem_request')} (
+		`id` int(11) unsigned NOT NULL auto_increment,
+		`order_id` varchar(255) NOT NULL default '',
+		`shipping_method` varchar(255) NOT NULL default '',
+		`request` text NOT NULL default '',
+		PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+"); 
 $attributeId = $installer->getAttributeId('catalog_product', 'wantitnow');
 if(!$attributeId && false){
     $defaultValue = '1';
@@ -77,6 +86,13 @@ if(!$attributeId && false){
         (entity_id, entity_type_id, attribute_id, value)
         SELECT entity_id, entity_type_id, {$newAttributeId}, '{$defaultValue}' FROM {$this->getTable('catalog_product_entity')}
     ");
+    
+}
+$fp = fopen( dirname(__FILE__) . '/timeslots.txt', 'r');
+
+while ($row = fgets($fp)) {
+	$installer->run("INSERT INTO {$this->getTable('webqem_timeslot')} (number_day, description, time_start, time_end) VALUES ".$row);
 }
 
+fclose($fp);
 $installer->endSetup();

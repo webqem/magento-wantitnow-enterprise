@@ -24,7 +24,7 @@ class Webqem_Mailcall_Block_Timeslots_Pickup extends Mage_Checkout_Block_Onepage
 		
 		$arrHolidays = array();
 		foreach ($holidays as $holiday) {
-			$arrHolidays[] = date('m/j/Y', strtotime($holiday->getHolidaysDate()));
+			$arrHolidays[] = date('j/m/Y', strtotime($holiday->getHolidaysDate()));
 			
 		}
 		if ($encode)

@@ -122,6 +122,9 @@
                     <holidays>
                         <table>webqem_holidays</table>
                     </holidays>
+                    <request>
+                        <table>webqem_request</table>
+                    </request>
                 </entities>
             </webqemmailcall_mysql4>
         </models>

@@ -11,10 +11,10 @@ class Webqem_Mailcall_ShippingController extends Mage_Core_Controller_Front_Acti
 			
 			$html = "<select name='shipping_pickup[timeslot]' style='width:170px' class='required-entry'>";
 			foreach ($timeslots as $timeslot) {
-				if (date("m/d/Y") == $data['day']) {
-					$nowTime=Mage::getSingleton('core/date')->timestamp();
+				if (date("d/m/Y") == $data['day']) {
+					$nowTime = Mage::getSingleton('core/date')->timestamp();
 					
-					$currentTime = floatval(date("H.i", $nowTime));
+					$currentTime = floatval(date("H.i", $nowTime))+1;
 					$timestart = floatval(str_replace(':', '.', $timeslot->getTimeStart()));
 					
 					if ($timestart>$currentTime) {

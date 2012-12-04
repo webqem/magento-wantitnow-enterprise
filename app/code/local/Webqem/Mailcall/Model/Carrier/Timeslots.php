@@ -780,97 +780,101 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         
         $request = $xml->asXML();
         $request = serialize(array('key' => $apikey, 'xml' => $request));
+        Mage::log("Webqemmailcall request saved");
+        Mage::log($request);
     	return $request;
     	 
     }
     
     public function bookXmlRequest($order) {
     	$requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
-    	->addFieldToFilter('order_id', $order->getIncrementId())
-    	->getFirstItem();
-    	
-    	$request = unserialize($requestModel->getRequest());
-    	$debugData['request_book'] = $request;
-    	
-    	Mage::log("Mail call timeslots XML request");
-    	Mage::log($request);
-    	
-        $privatelink='';
-        try {
-            
-            for($i=1;$i<=$this->_retryTimes;$i++){
-                //request book
-                $responseBody=$this->_submitPost($request);
-                if(!empty($responseBody)) break;
-            }
-            Mage::log($requestor);
-            Mage::log($responseBody);
-            //$i=5;$responseBody="";
-            //contact api error
-            if($i>=5 && empty($responseBody)){
-                $responseBody=$this->_contactApiErrorMsg('book');
-                $this->_sendErrorReportEmail('book','');
-            }
-            
-            $debugData['result_book'] = $responseBody;
-            $debugData['retrytimes_book'] = $i;
-            
-            $privatelink=$this->_getXmlString($responseBody,'privatelink');
-            
-            //added by Mike @ Mailcall 01/06/2012
-            $wintracklink=$this->_getXmlString($responseBody,'wintracklink');
-            $linenumber=$this->_getXmlString($responseBody,'lineno');
-            $mobileauthcode=$this->_getXmlString($responseBody,'mobileauthcode');
-            
-            //check lineno
-            $lineno='';//$this->_getXmlString($responseBody);
-            if(!empty($lineno) && false){
-                //request status
-                $statusXml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="status" version="1.4" />');
-                $newJob = $statusXml->addChild('job');
-                $newJob->addChild('lineno', $lineno);
-                $newJob->addChild('date', date('Ymd',$nowTime));
-
-                $statusRequest = $statusXml->asXML();
-                $statusRequest = array('key' => $this->getConfigData('apikey'), 'xml' => $statusRequest);
-                $debugData['request_status'] = $statusRequest;
-                
-                //$this->_submitPost($statusRequest);
-                        
-                for($i=1;$i<=$this->_retryTimes;$i++){
-                    $responseBody=$this->_submitPost($statusRequest);
-                    $error=$this->_getXmlString($responseBody,'error');
-                    if(!empty($responseBody) && empty($error)) break;
-                }
-                //$i=5;$responseBody="";
-                //contact api error
-                if($i>=5 && empty($responseBody)){
-                    $responseBody=$this->_contactApiErrorMsg('status');
-                    $this->_sendErrorReportEmail('status',$lineno);
-                }
-
-                $debugData['result_status'] = $responseBody;
-                $debugData['retrytimes_status'] = $i;
-                
-		
-
-            }
-            
-        } catch (Exception $e) {
-            $debugData['result'] = array('error' => $e->getMessage(), 'code' => $e->getCode());
-            $responseBody = '';
-        }
-        //delete request tmp 
-        $requestXml = Mage::getModel('webqemmailcall/request');
-        $requestXml->setId($requestModel->getId());
-        $requestXml->delete();
-        
-        $this->_debug($debugData);
-        //Modified by Mike @ Mailcall 01/06/2012
-        $res=$this->_parseBookXmlResponse($responseBody,$privatelink,$wintracklink,$linenumber,$mobileauthcode);
-        //$res=$this->_parseBookXmlResponse($responseBody,$privatelink);
-        
-        return $res;
+    						->addFieldToFilter('order_id', $order->getIncrementId())
+    						->addFieldToFilter('status', 0)
+    						->getFirstItem();
+    	if ($requestModel) {
+	    	$request = unserialize($requestModel->getRequest());
+	    	$debugData['request_book'] = $request;
+	    	
+	    	 Mage::log("Mail call XML request");
+		     Mage::log($request);
+	    	
+	        $privatelink='';
+	        try {
+	            
+	            for($i=1;$i<=$this->_retryTimes;$i++){
+	                //request book
+	                $responseBody=$this->_submitPost($request);
+	                if(!empty($responseBody)) break;
+	            }
+	            Mage::log($requestor);
+	            Mage::log($responseBody);
+	            //$i=5;$responseBody="";
+	            //contact api error
+	            if($i>=5 && empty($responseBody)){
+	                $responseBody=$this->_contactApiErrorMsg('book');
+	                $this->_sendErrorReportEmail('book','');
+	            }
+	            
+	            $debugData['result_book'] = $responseBody;
+	            $debugData['retrytimes_book'] = $i;
+	            
+	            $privatelink=$this->_getXmlString($responseBody,'privatelink');
+	            
+	            //added by Mike @ Mailcall 01/06/2012
+	            $wintracklink=$this->_getXmlString($responseBody,'wintracklink');
+	            $linenumber=$this->_getXmlString($responseBody,'lineno');
+	            $mobileauthcode=$this->_getXmlString($responseBody,'mobileauthcode');
+	            
+	            //check lineno
+	            $lineno='';//$this->_getXmlString($responseBody);
+	            if(!empty($lineno) && false){
+	                //request status
+	                $statusXml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="status" version="1.4" />');
+	                $newJob = $statusXml->addChild('job');
+	                $newJob->addChild('lineno', $lineno);
+	                $newJob->addChild('date', date('Ymd',$nowTime));
+	
+	                $statusRequest = $statusXml->asXML();
+	                $statusRequest = array('key' => $this->getConfigData('apikey'), 'xml' => $statusRequest);
+	                $debugData['request_status'] = $statusRequest;
+	                
+	                //$this->_submitPost($statusRequest);
+	                        
+	                for($i=1;$i<=$this->_retryTimes;$i++){
+	                    $responseBody=$this->_submitPost($statusRequest);
+	                    $error=$this->_getXmlString($responseBody,'error');
+	                    if(!empty($responseBody) && empty($error)) break;
+	                }
+	                //$i=5;$responseBody="";
+	                //contact api error
+	                if($i>=5 && empty($responseBody)){
+	                    $responseBody=$this->_contactApiErrorMsg('status');
+	                    $this->_sendErrorReportEmail('status',$lineno);
+	                }
+	
+	                $debugData['result_status'] = $responseBody;
+	                $debugData['retrytimes_status'] = $i;
+	                
+			
+	
+	            }
+	            
+	        } catch (Exception $e) {
+	            $debugData['result'] = array('error' => $e->getMessage(), 'code' => $e->getCode());
+	            $responseBody = '';
+	        }
+	        //delete request tmp 
+	        $requestXml = Mage::getModel('webqemmailcall/request');
+	        $requestXml->setId($requestModel->getId());
+	        $requestXml->delete();
+	        
+	        $this->_debug($debugData);
+	        //Modified by Mike @ Mailcall 01/06/2012
+	        $res=$this->_parseBookXmlResponse($responseBody,$privatelink,$wintracklink,$linenumber,$mobileauthcode);
+	        //$res=$this->_parseBookXmlResponse($responseBody,$privatelink);
+	        
+	        return $res;
+    	}
     }
     
    //Modified by Mike @ Mailcall 01/06/2012

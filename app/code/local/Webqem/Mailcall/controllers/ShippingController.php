@@ -4,8 +4,9 @@ class Webqem_Mailcall_ShippingController extends Mage_Core_Controller_Front_Acti
 	public function getTimeslotAction()
 	{
 		if ($data = $this->getRequest()->getPost()) {
-		
-			$day = date('N', strtotime($data['day']));
+			
+			$inputDate = str_replace('/', '-', $data['day']);
+			$day = date('N', strtotime($inputDate));
 			$count = 0;
 			$timeslots = Mage::getModel('webqemmailcall/timeslot')->getAllTimeslotByDay($day);
 			

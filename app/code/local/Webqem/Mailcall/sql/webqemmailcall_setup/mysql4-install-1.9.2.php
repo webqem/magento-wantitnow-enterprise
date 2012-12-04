@@ -50,6 +50,7 @@ $installer->run("
 		`order_id` varchar(255) NOT NULL default '',
 		`shipping_method` varchar(255) NOT NULL default '',
 		`request` text NOT NULL default '',
+		`status` smallint(6) NOT NULL default '0',
 		PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 "); 

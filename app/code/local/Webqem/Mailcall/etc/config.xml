@@ -217,10 +217,18 @@
                 <observers>
                     <webqemmailcall_observer>
                         <class>webqemmailcall/observer</class>
-                        <method>requestBookToMailcall</method>
+                        <method>saveRequestBook</method>
                     </webqemmailcall_observer>
                 </observers>
             </checkout_type_onepage_save_order>
+            <sales_order_save_after>
+                <observers>
+                    <webqemmailcall_observer_request>
+                        <class>webqemmailcall/observer</class>
+                        <method>requestBookToMailcall</method>
+                    </webqemmailcall_observer_request>
+                </observers>
+            </sales_order_save_after>
 			<adminhtml_block_salesrule_actions_prepareform>
 				<observers>
                     <webqemmailcall_observer>

@@ -10,7 +10,7 @@
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
-                    <comment><![CDATA[<font color="blue">Current Version:1.9.2</font>]]></comment>
+                    <comment><![CDATA[<font color="blue">Current Version: 1.0.0</font>]]></comment>
                     <fields>
                         <active translate="label">
                             <label>Enabled</label>
@@ -494,7 +494,7 @@
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
-                    
+                    <comment><![CDATA[<font color="blue">Current Version: 1.0.0</font>]]></comment>
                     <fields>
                         <active translate="label">
                             <label>Enabled</label>

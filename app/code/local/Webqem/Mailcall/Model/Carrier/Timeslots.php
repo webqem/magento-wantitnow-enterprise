@@ -336,10 +336,10 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
                 $body.='Your Password for tracking the delivery is: <b>'.$mobileauthcode.'</b><br/><br />';
 		$body.='If you have any questions regarding the delivery of your parcel, please contact customer service on 136 331. <br /><br />';
 		$body.='Regards <br /><br />';
-		$body.='Want it Now ';    
+		$body.='WantItNow ';
 		
 		
-        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'Want it Now');
+        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'WantItNow');
         
         return;
     }
@@ -1000,7 +1000,7 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
     
     protected function _trackingErrTips(){
         $result = Mage::getModel('shipping/tracking_result');
-        $errorTitle = Mage::helper('webqemmailcall')->__('Want it now');
+        $errorTitle = Mage::helper('webqemmailcall')->__('WantItNow');
         
         $error = Mage::getModel('shipping/tracking_result_error');
         $error->setCarrier($this->_code);

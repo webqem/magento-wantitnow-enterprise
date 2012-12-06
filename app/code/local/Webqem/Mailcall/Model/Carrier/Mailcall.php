@@ -349,7 +349,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
 	/*
      * send new order email notice
      */
-    protected function sendNewOrderNoticeEmail(){
+    protected function sendNewOrderNoticeEmail($wintracklink,$linenumber){
   
         $order		= $this->getOrder();
         $orderId	= $order->getData('increment_id');
@@ -362,6 +362,8 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
 
             $subject='Want it Now Priority Order #'.$orderId;
             $body='Priority Order Notification<br />Order '.$orderId.' is using Want it as the shipping method. Please attend to this order.';
+            //added extra line by Steve G @ webqem 06/12/2012
+            $body.='<br /><br />The WantItNow line number for this job is:<strong> ' . $linenumber . '</strong>.';
             $body.='<br /><br />Regards<br /><br />'.$storeName;
             
             foreach($emailArr as $toemail){
@@ -796,10 +798,11 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     	return $request;
     	
     }
-    public function bookXmlRequest($order) {
+    //Included the ORDER ID in the pass through - Steve G @ webqem 06/12/2012
+    public function bookXmlRequest($order, $orderId) {
         
         $requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
-        				->addFieldToFilter('order_id', $order->getIncrementId())
+                        ->addFieldToFilter('order_id', $orderId)
         				->addFieldToFilter('status', 0)
         				->getFirstItem();
         if ($requestModel) {
@@ -939,7 +942,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
             //Modified by Mike @ Mailcall 01/06/2012
             $this->sendNewOrderEmailToCustomer($privatelink,$wintracklink,$linenumber,$mobileauthcode);
             //$this->sendNewOrderEmailToCustomer($privatelink);
-            $this->sendNewOrderNoticeEmail();
+            $this->sendNewOrderNoticeEmail($wintracklink,$linenumber);
         }
 
         return $this;

@@ -113,20 +113,26 @@ class Webqem_Mailcall_Model_Observer
 			        		->getStatus();
         }
         $shippingMethod = $order->getShippingMethod();
-       
-        if ($orderStatus == Mage_Sales_Model_Order::STATE_PROCESSING) {
+
+        //if ($orderStatus == Mage_Sales_Model_Order::STATE_PROCESSING) {
+        //Commented out by Steve G @ webqem 06/12/2012
 	        if($shippingMethod == 'webqemmailcall_webqemmailcall'){
-	                $mailcallModel=Mage::getModel('webqemmailcall/carrier_mailcall');
-	                $mailcallModel->bookXmlRequest($order);
+	            $mailcallModel=Mage::getModel('webqemmailcall/carrier_mailcall');
+                //Passing through the ORDER and ORDER ID by Steve G @ webqem 06/12/2012
+                $mailcallModel->setOrder($order)
+                                    ->bookXmlRequest($order, $orderId);
 	        }
 	        
 	        if($shippingMethod == 'timeslot_timeslot') {
-	               $timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
-	               $timeslotsModel->bookXmlRequest($order);
+	            $timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
+                //Passing through the ORDER and ORDER ID by Steve G @ webqem 06/12/2012
+                $timeslotsModel->setOrder($order)
+                                    ->bookXmlRequest($order, $orderId);
 	            
 	        }
 	       
-        }
+        //}
+        //Commented out by Steve G @ webqem 06/12/2012
         $requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
 					        ->addFieldToFilter('order_id', $order->getIncrementId())
 					        ->addFieldToFilter('status', 0)
@@ -149,7 +155,7 @@ class Webqem_Mailcall_Model_Observer
                 0 => Mage::helper('salesrule')->__('No'),
                 Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM => Mage::helper('salesrule')->__('For matching items only'),
                 Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS => Mage::helper('salesrule')->__('For shipment with matching items'),
-				Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO => Mage::helper('salesrule')->__('For Want it Now Shipping Method'),
+				Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO => Mage::helper('salesrule')->__('For WantItNow Shipping Method'),
             ),
         ));
 		

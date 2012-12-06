@@ -47,7 +47,7 @@ class Webqem_Mailcall_Model_SalesRule_Validator extends Mage_SalesRule_Model_Val
      */
 	 
 	 /*
-	 * compatibility Magento > 1.4
+	 * compatibility Magento Enterprise > 1.0
 	 */
     public function processFreeShipping(Mage_Sales_Model_Quote_Item_Abstract $item)
     {
@@ -88,8 +88,8 @@ class Webqem_Mailcall_Model_SalesRule_Validator extends Mage_SalesRule_Model_Val
 	 * compatibility Magento == 1.32
 	 */
 	 public function process(Mage_Sales_Model_Quote_Item_Abstract $item){
-
-		 if(Mage::getVersion()<'1.4'){
+		//Changed the version number check to 1.0 for enterprise - Mike @ Mailcall 06/12/2012
+		 if(Mage::getVersion()<'1.0'){
 			 $this->_process_1324($item);
 		 }else{
 			 return parent::process($item);
@@ -118,179 +118,179 @@ class Webqem_Mailcall_Model_SalesRule_Validator extends Mage_SalesRule_Model_Val
 
         
 		//Commented out for Enterprise version
-		// foreach ($this->_rules as $rule) {
-            // /* @var $rule Mage_SalesRule_Model_Rule */
-            // /**
-             // * already tried to validate and failed
-             // */
-            // if ($rule->getIsValid() === false) {
-                // continue;
-            // }
+		foreach ($this->_rules as $rule) {
+            /* @var $rule Mage_SalesRule_Model_Rule */
+            /**
+             * already tried to validate and failed
+             */
+            if ($rule->getIsValid() === false) {
+                continue;
+            }
 
-            // if ($rule->getIsValid() !== true) {
-                // /**
-                 // * too many times used in general
-                 // */
-                // if ($rule->getUsesPerCoupon() && ($rule->getTimesUsed() >= $rule->getUsesPerCoupon())) {
-                    // $rule->setIsValid(false);
-                    // continue;
-                // }
-                // /**
-                 // * too many times used for this customer
-                 // */
-                // $ruleId = $rule->getId();
-                // if ($ruleId && $rule->getUsesPerCustomer()) {
-                    // $ruleCustomer->loadByCustomerRule($customerId, $ruleId);
-                    // if ($ruleCustomer->getId()) {
-                        // if ($ruleCustomer->getTimesUsed() >= $rule->getUsesPerCustomer()) {
-                            // continue;
-                        // }
-                    // }
-                // }
-                // $rule->afterLoad();
-                // /**
-                 // * quote does not meet rule's conditions
-                 // */
-                // if (!$rule->validate($address)) {
-                    // $rule->setIsValid(false);
-                    // continue;
-                // }
-                // /**
-                 // * passed all validations, remember to be valid
-                 // */
-                // $rule->setIsValid(true);
-            // }
+            if ($rule->getIsValid() !== true) {
+                /**
+                 * too many times used in general
+                 */
+                if ($rule->getUsesPerCoupon() && ($rule->getTimesUsed() >= $rule->getUsesPerCoupon())) {
+                    $rule->setIsValid(false);
+                    continue;
+                }
+                /**
+                 * too many times used for this customer
+                 */
+                $ruleId = $rule->getId();
+                if ($ruleId && $rule->getUsesPerCustomer()) {
+                    $ruleCustomer->loadByCustomerRule($customerId, $ruleId);
+                    if ($ruleCustomer->getId()) {
+                        if ($ruleCustomer->getTimesUsed() >= $rule->getUsesPerCustomer()) {
+                            continue;
+                        }
+                    }
+                }
+                $rule->afterLoad();
+                /**
+                 * quote does not meet rule's conditions
+                 */
+                if (!$rule->validate($address)) {
+                    $rule->setIsValid(false);
+                    continue;
+                }
+                /**
+                 * passed all validations, remember to be valid
+                 */
+                $rule->setIsValid(true);
+            }
 
-            // /**
-             // * although the rule is valid, this item is not marked for action
-             // */
-            // if (!$rule->getActions()->validate($item)) {
-                // continue;
-            // }
-            // $qty = $item->getQty();
-            // if ($item->getParentItem()) {
-                // $qty*= $item->getParentItem()->getQty();
-            // }
-            // $qty = $rule->getDiscountQty() ? min($qty, $rule->getDiscountQty()) : $qty;
-            // $rulePercent = min(100, $rule->getDiscountAmount());
-            // $discountAmount = 0;
-            // $baseDiscountAmount = 0;
-            // switch ($rule->getSimpleAction()) {
-                // case 'to_percent':
-                    // $rulePercent = max(0, 100-$rule->getDiscountAmount());
-                    // //no break;
+            /**
+             * although the rule is valid, this item is not marked for action
+             */
+            if (!$rule->getActions()->validate($item)) {
+                continue;
+            }
+            $qty = $item->getQty();
+            if ($item->getParentItem()) {
+                $qty*= $item->getParentItem()->getQty();
+            }
+            $qty = $rule->getDiscountQty() ? min($qty, $rule->getDiscountQty()) : $qty;
+            $rulePercent = min(100, $rule->getDiscountAmount());
+            $discountAmount = 0;
+            $baseDiscountAmount = 0;
+            switch ($rule->getSimpleAction()) {
+                case 'to_percent':
+                    $rulePercent = max(0, 100-$rule->getDiscountAmount());
+                    //no break;
 
-                // case 'by_percent':
-                    // if ($step = $rule->getDiscountStep()) {
-                        // $qty = floor($qty/$step)*$step;
-                    // }
-                    // $discountAmount    = ($qty*$item->getCalculationPrice() - $item->getDiscountAmount()) * $rulePercent/100;
-                    // $baseDiscountAmount= ($qty*$item->getBaseCalculationPrice() - $item->getBaseDiscountAmount()) * $rulePercent/100;
+                case 'by_percent':
+                    if ($step = $rule->getDiscountStep()) {
+                        $qty = floor($qty/$step)*$step;
+                    }
+                    $discountAmount    = ($qty*$item->getCalculationPrice() - $item->getDiscountAmount()) * $rulePercent/100;
+                    $baseDiscountAmount= ($qty*$item->getBaseCalculationPrice() - $item->getBaseDiscountAmount()) * $rulePercent/100;
 
-                    // if (!$rule->getDiscountQty() || $rule->getDiscountQty()>$qty) {
-                        // $discountPercent = min(100, $item->getDiscountPercent()+$rulePercent);
-                        // $item->setDiscountPercent($discountPercent);
-                    // }
-                    // break;
+                    if (!$rule->getDiscountQty() || $rule->getDiscountQty()>$qty) {
+                        $discountPercent = min(100, $item->getDiscountPercent()+$rulePercent);
+                        $item->setDiscountPercent($discountPercent);
+                    }
+                    break;
 
-                // case 'to_fixed':
-                    // $quoteAmount = $quote->getStore()->convertPrice($rule->getDiscountAmount());
-                    // $discountAmount    = $qty*($item->getCalculationPrice()-$quoteAmount);
-                    // $baseDiscountAmount= $qty*($item->getBaseCalculationPrice()-$rule->getDiscountAmount());
-                    // break;
+                case 'to_fixed':
+                    $quoteAmount = $quote->getStore()->convertPrice($rule->getDiscountAmount());
+                    $discountAmount    = $qty*($item->getCalculationPrice()-$quoteAmount);
+                    $baseDiscountAmount= $qty*($item->getBaseCalculationPrice()-$rule->getDiscountAmount());
+                    break;
 
-                // case 'by_fixed':
-                    // if ($step = $rule->getDiscountStep()) {
-                        // $qty = floor($qty/$step)*$step;
-                    // }
-                    // $quoteAmount = $quote->getStore()->convertPrice($rule->getDiscountAmount());
-                    // $discountAmount    = $qty*$quoteAmount;
-                    // $baseDiscountAmount= $qty*$rule->getDiscountAmount();
-                    // break;
+                case 'by_fixed':
+                    if ($step = $rule->getDiscountStep()) {
+                        $qty = floor($qty/$step)*$step;
+                    }
+                    $quoteAmount = $quote->getStore()->convertPrice($rule->getDiscountAmount());
+                    $discountAmount    = $qty*$quoteAmount;
+                    $baseDiscountAmount= $qty*$rule->getDiscountAmount();
+                    break;
 
-                // case 'cart_fixed':
-                    // $cartRules = $address->getCartFixedRules();
-                    // if (!isset($cartRules[$rule->getId()])) {
-                        // $cartRules[$rule->getId()] = $rule->getDiscountAmount();
-                    // }
-                    // if ($cartRules[$rule->getId()] > 0) {
-                        // $quoteAmount = $quote->getStore()->convertPrice($cartRules[$rule->getId()]);
-                        // $discountAmount = min($item->getRowTotal(), $quoteAmount);
-                        // $baseDiscountAmount = min($item->getBaseRowTotal(), $cartRules[$rule->getId()]);
-                        // $cartRules[$rule->getId()] -= $baseDiscountAmount;
-                    // }
-                    // $address->setCartFixedRules($cartRules);
-                    // break;
+                case 'cart_fixed':
+                    $cartRules = $address->getCartFixedRules();
+                    if (!isset($cartRules[$rule->getId()])) {
+                        $cartRules[$rule->getId()] = $rule->getDiscountAmount();
+                    }
+                    if ($cartRules[$rule->getId()] > 0) {
+                        $quoteAmount = $quote->getStore()->convertPrice($cartRules[$rule->getId()]);
+                        $discountAmount = min($item->getRowTotal(), $quoteAmount);
+                        $baseDiscountAmount = min($item->getBaseRowTotal(), $cartRules[$rule->getId()]);
+                        $cartRules[$rule->getId()] -= $baseDiscountAmount;
+                    }
+                    $address->setCartFixedRules($cartRules);
+                    break;
 
-                // case 'buy_x_get_y':
-                    // $x = $rule->getDiscountStep();
-                    // $y = $rule->getDiscountAmount();
-                    // if (!$x || $y>=$x) {
-                        // break;
-                    // }
-                    // $buy = 0; $free = 0;
-                    // while ($buy+$free<$qty) {
-                        // $buy += $x;
-                        // if ($buy+$free>=$qty) {
-                            // break;
-                        // }
-                        // $free += min($y, $qty-$buy-$free);
-                        // if ($buy+$free>=$qty) {
-                            // break;
-                        // }
-                    // }
-                    // $discountAmount    = $free*$item->getCalculationPrice();
-                    // $baseDiscountAmount= $free*$item->getBaseCalculationPrice();
-                    // break;
-            // }
+                case 'buy_x_get_y':
+                    $x = $rule->getDiscountStep();
+                    $y = $rule->getDiscountAmount();
+                    if (!$x || $y>=$x) {
+                        break;
+                    }
+                    $buy = 0; $free = 0;
+                    while ($buy+$free<$qty) {
+                        $buy += $x;
+                        if ($buy+$free>=$qty) {
+                            break;
+                        }
+                        $free += min($y, $qty-$buy-$free);
+                        if ($buy+$free>=$qty) {
+                            break;
+                        }
+                    }
+                    $discountAmount    = $free*$item->getCalculationPrice();
+                    $baseDiscountAmount= $free*$item->getBaseCalculationPrice();
+                    break;
+            }
 
-            // $result = new Varien_Object(array(
-                // 'discount_amount'      => $discountAmount,
-                // 'base_discount_amount' => $baseDiscountAmount,
-            // ));
-            // Mage::dispatchEvent('salesrule_validator_process', array(
-                // 'rule'    => $rule,
-                // 'item'    => $item,
-                // 'address' => $address,
-                // 'quote'   => $quote,
-                // 'qty'     => $qty,
-                // 'result'  => $result,
-            // ));
+            $result = new Varien_Object(array(
+                'discount_amount'      => $discountAmount,
+                'base_discount_amount' => $baseDiscountAmount,
+            ));
+            Mage::dispatchEvent('salesrule_validator_process', array(
+                'rule'    => $rule,
+                'item'    => $item,
+                'address' => $address,
+                'quote'   => $quote,
+                'qty'     => $qty,
+                'result'  => $result,
+            ));
 
-            // $discountAmount = $result->getDiscountAmount();
-            // $baseDiscountAmount = $result->getBaseDiscountAmount();
+            $discountAmount = $result->getDiscountAmount();
+            $baseDiscountAmount = $result->getBaseDiscountAmount();
 
-            // $discountAmount     = $quote->getStore()->roundPrice($discountAmount);
-            // $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
-            // $discountAmount     = min($item->getDiscountAmount()+$discountAmount, $item->getRowTotal());
-            // $baseDiscountAmount = min($item->getBaseDiscountAmount()+$baseDiscountAmount, $item->getBaseRowTotal());
+            $discountAmount     = $quote->getStore()->roundPrice($discountAmount);
+            $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
+            $discountAmount     = min($item->getDiscountAmount()+$discountAmount, $item->getRowTotal());
+            $baseDiscountAmount = min($item->getBaseDiscountAmount()+$baseDiscountAmount, $item->getBaseRowTotal());
 
-            // $item->setDiscountAmount($discountAmount);
-            // $item->setBaseDiscountAmount($baseDiscountAmount);
+            $item->setDiscountAmount($discountAmount);
+            $item->setBaseDiscountAmount($baseDiscountAmount);
 
-            // switch ($rule->getSimpleFreeShipping()) {
-                // case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM:
-                    // $item->setFreeShipping($rule->getDiscountQty() ? $rule->getDiscountQty() : true);
-                    // break;
+            switch ($rule->getSimpleFreeShipping()) {
+                case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM:
+                    $item->setFreeShipping($rule->getDiscountQty() ? $rule->getDiscountQty() : true);
+                    break;
 
-                // case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS:
-                    // $address->setFreeShipping(true);
-                    // break;
-				// case Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO:
-					// $address->setFreeShipping(-1);
-                    // break;
-            // }
+                case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS:
+                    $address->setFreeShipping(true);
+                    break;
+				case Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO:
+					$address->setFreeShipping(-1);
+                    break;
+            }
 
-            // $appliedRuleIds[$rule->getRuleId()] = $rule->getRuleId();
+            $appliedRuleIds[$rule->getRuleId()] = $rule->getRuleId();
 
-            // if ($rule->getCouponCode() && ( strtolower($rule->getCouponCode()) == strtolower($this->getCouponCode()))) {
-                // $address->setCouponCode($this->getCouponCode());
-            // }
+            if ($rule->getCouponCode() && ( strtolower($rule->getCouponCode()) == strtolower($this->getCouponCode()))) {
+                $address->setCouponCode($this->getCouponCode());
+            }
 
-            // if ($rule->getStopRulesProcessing()) {
-                // break;
-            // }
-        // }
+            if ($rule->getStopRulesProcessing()) {
+                break;
+            }
+        }
         $item->setAppliedRuleIds(join(',',$appliedRuleIds));
         $address->setAppliedRuleIds($this->mergeIds($address->getAppliedRuleIds(), $appliedRuleIds));
         $quote->setAppliedRuleIds($this->mergeIds($quote->getAppliedRuleIds(), $appliedRuleIds));

@@ -221,6 +221,7 @@
                     </webqemmailcall_observer>
                 </observers>
             </checkout_type_onepage_save_order>
+            <!--Commented Out By Steve G @ webqem 06/12/2012
             <sales_order_save_after>
                 <observers>
                     <webqemmailcall_observer_request>
@@ -228,7 +229,15 @@
                         <method>requestBookToMailcall</method>
                     </webqemmailcall_observer_request>
                 </observers>
-            </sales_order_save_after>
+            </sales_order_save_after>-->
+            <sales_order_place_after>
+                <observers>
+                    <webqemmailcall_observer_request>
+                        <class>webqemmailcall/observer</class>
+                        <method>requestBookToMailcall</method>
+                    </webqemmailcall_observer_request>
+                </observers>
+            </sales_order_place_after>
 			<adminhtml_block_salesrule_actions_prepareform>
 				<observers>
                     <webqemmailcall_observer>

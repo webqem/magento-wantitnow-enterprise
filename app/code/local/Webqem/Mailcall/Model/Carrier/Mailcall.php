@@ -327,21 +327,21 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
             $customerName = $order->getCustomerName();
         }
 		
-        $subject='Want it Now Delivery Tracking for Order # '.$orderId;
+        $subject='WantItNow Delivery Tracking for Order # '.$orderId;
         $body ='Dear '.$customerName.'<br /><br />' ;
-		$body.='Thank you for choosing Want it Now powered by Mail Call Couriers as your delivery method. <br /><br />';
+		$body.='Thank you for choosing WantItNow powered by Mail Call Couriers as your delivery method. <br /><br />';
         //Modified by Mike @ Mailcall 01/06/2012
 		//$body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link <a href="'.$privatelink.'" target="_blank">'.$privatelink.'</a>.<br /><br />';
-        $body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link: <a href="'.$wintracklink.'" target="_blank">Track your Want it Now delivery</a>.<br /><br />';
+        $body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link: <a href="'.$wintracklink.'" target="_blank">Track your WantItNow delivery</a>.<br /><br />';
         $body.='Alternatively, you can download our <a href="http://www.wantitnow.com.au/download-our-app" target="_blank">mobile app for iPhone or Android handsets here</a> and track your package in real-time on your mobile.<br /><br />';
         $body.='Your Line Number for tracking the delivery is: <b>'.$linenumber.'</b><br />';
         $body.='Your Password for tracking the delivery is: <b>'.$mobileauthcode.'</b><br/><br />';
 		$body.='If you have any questions regarding the delivery of your parcel, please contact customer service on 136 331. <br /><br />';
 		$body.='Regards <br /><br />';
-		$body.='Want it Now ';    
+		$body.='WantItNow ';
 		
 		
-        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'Want it Now');
+        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'WantItNow');
         
         return;
     }
@@ -349,7 +349,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
 	/*
      * send new order email notice
      */
-    protected function sendNewOrderNoticeEmail(){
+    protected function sendNewOrderNoticeEmail($wintracklink,$linenumber){
   
         $order		= $this->getOrder();
         $orderId	= $order->getData('increment_id');
@@ -360,8 +360,10 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
         if(!empty($notificationEmail)){
             $emailArr=explode(',',$notificationEmail);
 
-            $subject='Want it Now Priority Order #'.$orderId;
-            $body='Priority Order Notification<br />Order '.$orderId.' is using Want it as the shipping method. Please attend to this order.';
+            $subject='WantItNow Priority Order #'.$orderId;
+            $body='Priority Order Notification<br />Order '.$orderId.' is using WantItNow as the shipping method. Please attend to this order.';
+            //added extra line by Steve G @ webqem 06/12/2012
+            $body.='<br /><br />The WantItNow line number for this job is:<strong> ' . $linenumber . '</strong>.';
             $body.='<br /><br />Regards<br /><br />'.$storeName;
             
             foreach($emailArr as $toemail){
@@ -796,10 +798,11 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     	return $request;
     	
     }
-    public function bookXmlRequest($order) {
+    //Included the ORDER ID in the pass through - Steve G @ webqem 06/12/2012
+    public function bookXmlRequest($order, $orderId) {
         
         $requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
-        				->addFieldToFilter('order_id', $order->getIncrementId())
+                        ->addFieldToFilter('order_id', $orderId)
         				->addFieldToFilter('status', 0)
         				->getFirstItem();
         if ($requestModel) {
@@ -939,7 +942,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
             //Modified by Mike @ Mailcall 01/06/2012
             $this->sendNewOrderEmailToCustomer($privatelink,$wintracklink,$linenumber,$mobileauthcode);
             //$this->sendNewOrderEmailToCustomer($privatelink);
-            $this->sendNewOrderNoticeEmail();
+            $this->sendNewOrderNoticeEmail($wintracklink,$linenumber);
         }
 
         return $this;
@@ -1002,7 +1005,7 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     
     protected function _trackingErrTips(){
         $result = Mage::getModel('shipping/tracking_result');
-        $errorTitle = Mage::helper('webqemmailcall')->__('Want it now');
+        $errorTitle = Mage::helper('webqemmailcall')->__('WantItNow');
         
         $error = Mage::getModel('shipping/tracking_result_error');
         $error->setCarrier($this->_code);

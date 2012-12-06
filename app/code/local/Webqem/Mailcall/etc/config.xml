@@ -49,11 +49,11 @@
     <adminhtml>
        <menu>
             <webqemall>
-            	<title>webqem</title>
+            	<title>WantItNow</title>
 		<sort_order>71</sort_order>     
                 <children>
                     <mailcall translate="title" module="webqemmailcall">
-                        <title>Manage Timeslot</title>
+                        <title>Manage Timeslots</title>
                         <sort_order>1</sort_order>
                         <action>webqemmailcall/adminhtml_timeslot</action>
                     </mailcall>

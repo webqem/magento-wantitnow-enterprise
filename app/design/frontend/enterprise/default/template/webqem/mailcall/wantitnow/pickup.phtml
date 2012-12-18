@@ -21,6 +21,11 @@
 </style>
 <script type="text/javascript">
 	var countMailcallSms = 0;
+	jQuery('#shipping_form_webqemmailcall_webqemmailcall input:checkbox').each(function (index) {
+		 if(jQuery(this).is(':checked')) {
+			 countMailcallSms++;
+		 }
+	});
 	jQuery('#shipping_form_webqemmailcall_webqemmailcall input:checkbox').click(
 		 function(e){
 		    if(jQuery(this).is(':checked')) {

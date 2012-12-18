@@ -97,8 +97,14 @@
 	        }
 	    });
 		var countMailcallSms = 0;
+		jQuery('#shipping_form_timeslot_timeslot input:checkbox').each(function (index) {
+			 if(jQuery(this).is(':checked')) {
+			    	countMailcallSms++;
+			 }
+		});
 		jQuery('#shipping_form_timeslot_timeslot input:checkbox').click(
 			 function(e){
+				
 			    if(jQuery(this).is(':checked')) {
 			    	countMailcallSms++;
 			    } else {
@@ -107,6 +113,7 @@
 			    if (countMailcallSms>0) {
 					jQuery('#timeslot_phone_wrapper').show();
 			    } else {
+			    	countMailcallSms = 0;
 			    	jQuery('#timeslot_phone_wrapper').hide();
 			    }
 			 }

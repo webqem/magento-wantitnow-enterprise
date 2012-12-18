@@ -731,7 +731,9 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     	$homeaddress 	= $this->getCheckout()->getStepData('shipping_method','mailcall_homeaddress');
     	$homepostal		= $this->getCheckout()->getStepData('shipping_method','mailcall_homepostal');
     	$apikey			= $this->getCheckout()->getStepData('shipping_method','mailcall_apikey');
-    
+    	$arrConfig 		= unserialize($this->getConfigData('apikeys'));
+    	$apikey 		= $arrConfig['apikey'][0];
+    	
     	//echo $this->getConfigData('fromaddress');
     	$getQuote = $xml->addChild('job');
     	$requestor = $getQuote;

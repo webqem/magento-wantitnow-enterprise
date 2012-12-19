@@ -726,12 +726,10 @@ class Webqem_Mailcall_Model_Carrier_Mailcall extends Mage_Shipping_Model_Carrier
     			$readytime = date('Hi',$nowTime);
     		}
     	}
-    
-    	$suburb			= $this->getCheckout()->getStepData('shipping_method','mailcall_suburb');
-    	$homeaddress 	= $this->getCheckout()->getStepData('shipping_method','mailcall_homeaddress');
-    	$homepostal		= $this->getCheckout()->getStepData('shipping_method','mailcall_homepostal');
-    	$apikey			= $this->getCheckout()->getStepData('shipping_method','mailcall_apikey');
     	$arrConfig 		= unserialize($this->getConfigData('apikeys'));
+    	$suburb			= $arrConfig['suburb'][0];
+    	$homeaddress 	= $arrConfig['homeaddress'][0];
+    	$homepostal		= $this->getCheckout()->getStepData('shipping_method','mailcall_homepostal');
     	$apikey 		= $arrConfig['apikey'][0];
     	
     	//echo $this->getConfigData('fromaddress');

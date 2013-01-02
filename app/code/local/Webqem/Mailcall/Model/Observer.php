@@ -60,33 +60,86 @@ class Webqem_Mailcall_Model_Observer
         return Mage::getSingleton('checkout/session');
     }
 	
+    // get request book for saving
+	public function saveRequestBook($observer) {
+		$useMailcall=$this->getCheckout()->getStepData('shipping_method','use_mailcall');
+		$order = $observer->getOrder();
+		
+		$strRequest = "";
+		$shippingMethod = $order->getShippingMethod();
+		
+		
+		if($useMailcall) {
+			$event = $observer->getEvent();
+			$order = $event->getOrder();
+			$quote = $event->getQuote();
+
+			$mailcallModel = Mage::getModel('webqemmailcall/carrier_mailcall');
+	
+			$strRequest = $mailcallModel->setOrder($order)
+								->getbookXmlRequest($quote);
+		}
+		 
+		if ($shippingMethod == 'timeslot_timeslot') {
+			$event = $observer->getEvent();
+			$order = $event->getOrder();
+			$quote = $event->getQuote();
+			$timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
+			$strRequest = $timeslotsModel->setOrder($order)
+								->getbookXmlRequest($quote);
+			 
+		}
+		$data['order_id'] 		 = $order->getData('increment_id');
+		$data['shipping_method'] = $shippingMethod;
+		$data['request']  		 = $strRequest;
+		
+		$requestModel = Mage::getModel('webqemmailcall/request')->setData($data)->save();
+		
+		return;
+	}
     public function requestBookToMailcall($observer){
-        $useMailcall=$this->getCheckout()->getStepData('shipping_method','use_mailcall');
-        $order = $observer->getOrder();
-        
-        if($useMailcall){
-                $event = $observer->getEvent();
-                $order=$event->getOrder();
-                $quote=$event->getQuote();
-                //$privatelink=$this->getCheckout()->getStepData('shipping_method','mailcall_privatelink');
+    	
+        $order 		 = $observer->getEvent()->getOrder();
+        $orderId = $order->getIncrementId();
+        if (!$orderId) {
+        	$orderId = $order->getId();
+        }
+        $orderStatus = Mage::getModel('sales/order')->loadByIncrementId($order->getIncrementId())
+			        								->getStatus();
+        if (!$orderStatus) {
+        	$orderStatus = Mage::getModel('sales/order')->load($orderId)
+			        		->getCollection()
+			        		->getFirstItem()
+			        		->getStatus();
+        }
+        $shippingMethod = $order->getShippingMethod();
 
-                $mailcallModel=Mage::getModel('webqemmailcall/carrier_mailcall');
-
+        //if ($orderStatus == Mage_Sales_Model_Order::STATE_PROCESSING) {
+        //Commented out by Steve G @ webqem 06/12/2012
+	        if($shippingMethod == 'webqemmailcall_webqemmailcall'){
+	            $mailcallModel=Mage::getModel('webqemmailcall/carrier_mailcall');
+                //Passing through the ORDER and ORDER ID by Steve G @ webqem 06/12/2012
                 $mailcallModel->setOrder($order)
-                              ->bookXmlRequest($quote);
-
-        }
-        
-        if ($order->getShippingMethod() == 'timeslot_timeslot') {
-            $event = $observer->getEvent();
-                $order=$event->getOrder();
-                $quote=$event->getQuote();
-                $timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
+                                    ->bookXmlRequest($order, $orderId);
+	        }
+	        
+	        if($shippingMethod == 'timeslot_timeslot') {
+	            $timeslotsModel = Mage::getModel('webqemmailcall/carrier_timeslots');
+                //Passing through the ORDER and ORDER ID by Steve G @ webqem 06/12/2012
                 $timeslotsModel->setOrder($order)
-                              ->bookXmlRequest($quote);
-            
-        }
-
+                                    ->bookXmlRequest($order, $orderId);
+	            
+	        }
+	       
+        //}
+        //Commented out by Steve G @ webqem 06/12/2012
+        $requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
+					        ->addFieldToFilter('order_id', $order->getIncrementId())
+					        ->addFieldToFilter('status', 0)
+					        ->getFirstItem();
+        $model = Mage::getModel('webqemmailcall/request')->load($requestModel->getId());
+        $model->setData('status', 1);
+        $model->save();
         return;
     }
 	
@@ -102,7 +155,7 @@ class Webqem_Mailcall_Model_Observer
                 0 => Mage::helper('salesrule')->__('No'),
                 Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM => Mage::helper('salesrule')->__('For matching items only'),
                 Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS => Mage::helper('salesrule')->__('For shipment with matching items'),
-				Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO => Mage::helper('salesrule')->__('For Want it Now Shipping Method'),
+				Webqem_Mailcall_Model_Carrier_Mailcall::MAILCALL_FREE_SHIPPING_PROMO => Mage::helper('salesrule')->__('For WantItNow Shipping Method'),
             ),
         ));
 		

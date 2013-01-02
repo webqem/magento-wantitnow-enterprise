@@ -1,6 +1,11 @@
-app/code/local/Webqem/*                                                                     app/code/local/Webqem/
-app/design/adminhtml/default/default/layout/webqemmailcall.xml                              app/design/adminhtml/default/default/layout/webqemmailcall.xml
-app/etc/modules/Webqem_Mailcall.xml                                                         app/etc/modules/Webqem_Mailcall.xml
-app/locale/en_US/Webqem_Mailcall.csv                                                        app/locale/en_US/Webqem_Mailcall.csv
-js/webqem/adminhtml/*                                                                       js/webqem/adminhtml/
-media/*                                                                                     media/
+app/code/local/Webqem/*                                                     app/code/local/Webqem/
+app/design/adminhtml/default/default/layout/webqemmailcall.xml              app/design/adminhtml/default/default/layout/webqemmailcall.xml
+app/design/adminhtml/default/default/template/webqem/*                      app/design/adminhtml/default/default/template/webqem/
+app/design/frontend/enterprise/default/layout/webqem/*					    app/design/frontend/enterprise/default/layout/webqem/
+app/design/frontend/enterprise/default/template/webqem/*					app/design/frontend/enterprise/default/template/webqem/
+app/etc/modules/Webqem_Mailcall.xml                                         app/etc/modules/Webqem_Mailcall.xml
+app/locale/en_US/Webqem_Mailcall.csv                                        app/locale/en_US/Webqem_Mailcall.csv
+skin/frontend/enterprise/default/webqem/*								    skin/frontend/enterprise/default/webqem/
+js/jquery/*											                        js/jquery/
+js/webqem/*											                        js/webqem/
+media/*                                                                     media/

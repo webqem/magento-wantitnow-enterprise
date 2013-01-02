@@ -253,7 +253,7 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         }
         $r->setServiceTime($dayandhours);
 
-
+	
         $this->_rawRequest = $r;
 
         return $this;
@@ -325,28 +325,28 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
             $customerName = $order->getCustomerName();
         }
 		
-        $subject='Want it Now Delivery Tracking for Order # '.$orderId;
+        $subject='WantItNowNow Timeslots Delivery Tracking for Order # '.$orderId;
         $body='Dear '.$customerName.'<br /><br />' ;
-		$body.='Thank you for choosing Want it Now powered by Mail Call Couriers as your delivery method. <br /><br />';
+		$body.='Thank you for choosing WantItNow Timeslots powered by Mail Call Couriers as your delivery method. <br /><br />';
                 //Modified by Mike @ Mailcall 01/06/2012
-		//$body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link <a href="'.$privatelink.'" target="_blank">'.$privatelink.'</a>.<br /><br />';
-                $body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link: <a href="'.$wintracklink.'" target="_blank">Track your Want it Now delivery</a>.<br /><br />';
+		        //$body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link <a href="'.$privatelink.'" target="_blank">'.$privatelink.'</a>.<br /><br />';
+                $body.='Your order will be picked up shortly, for delivery today. We know this order is urgent so you can follow its real time status using this link: <a href="'.$wintracklink.'" target="_blank">Track your WantItNow Timeslots delivery</a>.<br /><br />';
                 $body.='Alternatively, you can download our <a href="http://www.wantitnow.com.au/download-our-app" target="_blank">mobile app for iPhone or Android handsets here</a> and track your package in real-time on your mobile.<br /><br />';
                 $body.='Your Line Number for tracking the delivery is: <b>'.$linenumber.'</b><br />';
                 $body.='Your Password for tracking the delivery is: <b>'.$mobileauthcode.'</b><br/><br />';
 		$body.='If you have any questions regarding the delivery of your parcel, please contact customer service on 136 331. <br /><br />';
 		$body.='Regards <br /><br />';
-		$body.='Want it Now ';    
+		$body.='WantItNow ';
 		
 		
-        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'Want it Now');
+        $this->_sendMailcallEmail($subject, $body, $toemail, $senderEMAIL,'WantItNow');
         
         return;
     }
 	/*
      * send new order email notice
      */
-    protected function sendNewOrderNoticeEmail(){
+    protected function sendNewOrderNoticeEmail($wintracklink,$linenumber){
   
         $order=$this->getOrder();
         $orderId=$order->getData('increment_id');
@@ -357,8 +357,10 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         if(!empty($notificationEmail)){
             $emailArr=explode(',',$notificationEmail);
 
-            $subject='Want it Now Priority Order #'.$orderId;
-            $body='Priority Order Notification<br />Order '.$orderId.' is using Want it as the shipping method. Please attend to this order.';
+            $subject='WantItNow Timeslots Priority Order #'.$orderId;
+            $body='Priority Order Notification<br />Order '.$orderId.' is using WantItNow Timeslots as the shipping method. Please attend to this order.';
+            //added extra line by Steve G @ webqem 06/12/2012
+            $body.='<br /><br />The WantItNow Timeslots line number for this job is:<strong> ' . $linenumber . '</strong>.';
             $body.='<br /><br />Regards<br /><br />'.$storeName;
             
             foreach($emailArr as $toemail){
@@ -688,10 +690,11 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
     protected function getCheckout(){
             return Mage::getSingleton('checkout/session');
     }
-    
-    
-    public function bookXmlRequest($quote) {
-        $order=$this->getOrder();
+    // get xml request to save
+    public function getbookXmlRequest($quote) {
+    	$order=$this->getOrder();
+        //added order number variable for use in REFERENCE XML by Mike @ Mailcall 28/11/2012
+        $orderId=$order->getData('increment_id');
         $address=$order->getShippingAddress();
         $street=$address->getStreet();
         $streetStr='';
@@ -719,7 +722,8 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         
         $getQuote = $xml->addChild('job');
         $requestor = $getQuote;
-        $requestor->addChild('date', date('Ymd',strtotime($pickup['timeslot_date'])));        
+        //reformatted the timestamp to pick up the friendly date from the calendar - Steve G @ webqem 06/12/2012
+        $requestor->addChild('date', date('Ydm',strtotime($pickup['timeslot_date'])));
         $requestor->addChild('fromcompany', $this->getConfigData('fromcompany'));
         $requestor->addChild('fromaddress1', $homeaddress);//$this->getConfigData('fromaddress')
         $requestor->addChild('fromcontact', $this->getConfigData('fromcontact'));
@@ -728,7 +732,8 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         $requestor->addChild('frompostcode', $homepostal);//$this->getConfigData('frompostcode')
         $requestor->addChild('tocompany', $address->getCompany());
         $requestor->addChild('toaddress1', $streetStr);
-        $requestor->addChild('tocontact', $address->getFirstName().' '.$address->getLastName());
+        //added lowercase Firstname / Lastname by Mike @ Mailcall 28/11/2012
+        $requestor->addChild('tocontact', $address->getFirstname().' '.$address->getLastname());
         $requestor->addChild('tophone', $address->getTelephone());
         $requestor->addChild('tosuburb', $address->getCity());
         $requestor->addChild('topostcode', $address->getPostcode());
@@ -739,14 +744,15 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
         $requestor->addChild('sizeclass', 'Archive Box');
         $requestor->addChild('readytime', $readytime);
         $requestor->addChild('driverinstructions', '');
-        $requestor->addChild('reference', '');
+        //added order number to REFERENCE by Mike @ Mailcall 28/11/2012
+        $requestor->addChild('reference', $orderId);
         $requestor->addChild('consignment', '');
         
         $options = $requestor->addChild('options');
         $options->addChild('warehousesms',  $this->getConfigData('warehouse_sms_nofify') ? 'Y' : 'N');
         $options->addChild('custdeldispatchsms', isset($pickup['sms_dispatched']) ? 'Y' : 'N' );
         $options->addChild('custdelimminentsms', isset($pickup['sms_time_away']) ? 'Y' : 'N' );
-        $options->addChild('custsmsphone',$address->getTelephone());
+        $options->addChild('custsmsphone',$pickup['phone_number']);
         $options->addChild('warehousesmsphone', $this->getConfigData('sms_contact_number'));
          
         $items = $requestor->addChild('items');
@@ -771,86 +777,109 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
             }
         }
 
-        $requestor->addChild('quantity', $quote->getItemsQty());
+        $requestor->addChild('quantity', $i);
         $requestor->addChild('oktoleave', 'N');
         $requestor->addChild('echo', 'N');
         
         $request = $xml->asXML();
-        $request = array('key' => $apikey, 'xml' => $request);
-        $debugData['request_book'] = $request;
-//        Mage::log($requestor);die;
-        $privatelink='';
-        try {
-            
-            for($i=1;$i<=$this->_retryTimes;$i++){
-                //request book
-                $responseBody=$this->_submitPost($request);
-                if(!empty($responseBody)) break;
-            }
-            Mage::log($requestor);
-            Mage::log($responseBody);
-            //$i=5;$responseBody="";
-            //contact api error
-            if($i>=5 && empty($responseBody)){
-                $responseBody=$this->_contactApiErrorMsg('book');
-                $this->_sendErrorReportEmail('book','');
-            }
-            
-            $debugData['result_book'] = $responseBody;
-            $debugData['retrytimes_book'] = $i;
-            
-            $privatelink=$this->_getXmlString($responseBody,'privatelink');
-            
-            //added by Mike @ Mailcall 01/06/2012
-            $wintracklink=$this->_getXmlString($responseBody,'wintracklink');
-            $linenumber=$this->_getXmlString($responseBody,'lineno');
-            $mobileauthcode=$this->_getXmlString($responseBody,'mobileauthcode');
-            
-            //check lineno
-            $lineno='';//$this->_getXmlString($responseBody);
-            if(!empty($lineno) && false){
-                //request status
-                $statusXml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="status" version="1.4" />');
-                $newJob = $statusXml->addChild('job');
-                $newJob->addChild('lineno', $lineno);
-                $newJob->addChild('date', date('Ymd',$nowTime));
+        $request = serialize(array('key' => $apikey, 'xml' => $request));
+        Mage::log("Webqemmailcall request saved");
+        Mage::log($request);
+    	return $request;
+    	 
+    }
 
-                $statusRequest = $statusXml->asXML();
-                $statusRequest = array('key' => $this->getConfigData('apikey'), 'xml' => $statusRequest);
-                $debugData['request_status'] = $statusRequest;
-                
-                //$this->_submitPost($statusRequest);
-                        
-                for($i=1;$i<=$this->_retryTimes;$i++){
-                    $responseBody=$this->_submitPost($statusRequest);
-                    $error=$this->_getXmlString($responseBody,'error');
-                    if(!empty($responseBody) && empty($error)) break;
-                }
-                //$i=5;$responseBody="";
-                //contact api error
-                if($i>=5 && empty($responseBody)){
-                    $responseBody=$this->_contactApiErrorMsg('status');
-                    $this->_sendErrorReportEmail('status',$lineno);
-                }
-
-                $debugData['result_status'] = $responseBody;
-                $debugData['retrytimes_status'] = $i;
-                
-		
-
-            }
-            
-        } catch (Exception $e) {
-            $debugData['result'] = array('error' => $e->getMessage(), 'code' => $e->getCode());
-            $responseBody = '';
-        }
-
-        $this->_debug($debugData);
-        //Modified by Mike @ Mailcall 01/06/2012
-        $res=$this->_parseBookXmlResponse($responseBody,$privatelink,$wintracklink,$linenumber,$mobileauthcode);
-        //$res=$this->_parseBookXmlResponse($responseBody,$privatelink);
-        
-        return $res;
+    //Included the ORDER ID in the pass through - Steve G @ webqem 06/12/2012
+    public function bookXmlRequest($order, $orderId) {
+    	$requestModel = Mage::getModel('webqemmailcall/request')->getCollection()
+                            ->addFieldToFilter('order_id', $orderId)
+    						->addFieldToFilter('status', 0)
+    						->getFirstItem();
+    	if ($requestModel) {
+	    	$request = unserialize($requestModel->getRequest());
+	    	$debugData['request_book'] = $request;
+	    	
+	    	 Mage::log("Mail call XML request");
+		     Mage::log($request);
+	    	
+	        $privatelink='';
+	        try {
+	            
+	            for($i=1;$i<=$this->_retryTimes;$i++){
+	                //request book
+	                $responseBody=$this->_submitPost($request);
+	                if(!empty($responseBody)) break;
+	            }
+                //commented out by Steve G @ webqem 06/12/2012
+                //Mage::log($requestor);
+	            Mage::log($responseBody);
+	            //$i=5;$responseBody="";
+	            //contact api error
+	            if($i>=5 && empty($responseBody)){
+	                $responseBody=$this->_contactApiErrorMsg('book');
+	                $this->_sendErrorReportEmail('book','');
+	            }
+	            
+	            $debugData['result_book'] = $responseBody;
+	            $debugData['retrytimes_book'] = $i;
+	            
+	            $privatelink=$this->_getXmlString($responseBody,'privatelink');
+	            
+	            //added by Mike @ Mailcall 01/06/2012
+	            $wintracklink=$this->_getXmlString($responseBody,'wintracklink');
+	            $linenumber=$this->_getXmlString($responseBody,'lineno');
+	            $mobileauthcode=$this->_getXmlString($responseBody,'mobileauthcode');
+	            
+	            //check lineno
+	            $lineno='';//$this->_getXmlString($responseBody);
+	            if(!empty($lineno) && false){
+	                //request status
+	                $statusXml = new SimpleXMLElement('<?xml version = "1.0" encoding = "UTF-8"?><request xmlns="http://www.mailcall.com.au" type="status" version="1.4" />');
+	                $newJob = $statusXml->addChild('job');
+	                $newJob->addChild('lineno', $lineno);
+	                $newJob->addChild('date', date('Ymd',$nowTime));
+	
+	                $statusRequest = $statusXml->asXML();
+	                $statusRequest = array('key' => $this->getConfigData('apikey'), 'xml' => $statusRequest);
+	                $debugData['request_status'] = $statusRequest;
+	                
+	                //$this->_submitPost($statusRequest);
+	                        
+	                for($i=1;$i<=$this->_retryTimes;$i++){
+	                    $responseBody=$this->_submitPost($statusRequest);
+	                    $error=$this->_getXmlString($responseBody,'error');
+	                    if(!empty($responseBody) && empty($error)) break;
+	                }
+	                //$i=5;$responseBody="";
+	                //contact api error
+	                if($i>=5 && empty($responseBody)){
+	                    $responseBody=$this->_contactApiErrorMsg('status');
+	                    $this->_sendErrorReportEmail('status',$lineno);
+	                }
+	
+	                $debugData['result_status'] = $responseBody;
+	                $debugData['retrytimes_status'] = $i;
+	                
+			
+	
+	            }
+	            
+	        } catch (Exception $e) {
+	            $debugData['result'] = array('error' => $e->getMessage(), 'code' => $e->getCode());
+	            $responseBody = '';
+	        }
+	        //delete request tmp 
+	        $requestXml = Mage::getModel('webqemmailcall/request');
+	        $requestXml->setId($requestModel->getId());
+	        $requestXml->delete();
+	        
+	        $this->_debug($debugData);
+	        //Modified by Mike @ Mailcall 01/06/2012
+	        $res=$this->_parseBookXmlResponse($responseBody,$privatelink,$wintracklink,$linenumber,$mobileauthcode);
+	        //$res=$this->_parseBookXmlResponse($responseBody,$privatelink);
+	        
+	        return $res;
+    	}
     }
     
    //Modified by Mike @ Mailcall 01/06/2012
@@ -899,16 +928,16 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
              $num++;
         }
         if(!empty($errorMsg)){
-            $result['success']  = false;
+            /* $result['success']  = false;
             $result['error']    = true;
             $result['error_messages'] = 'Error:'.$errorMsg;
             echo Zend_Json::encode($result);
-            exit;
+            exit; */
         }else{
             //Modified by Mike @ Mailcall 01/06/2012
             $this->sendNewOrderEmailToCustomer($privatelink,$wintracklink,$linenumber,$mobileauthcode);
             //$this->sendNewOrderEmailToCustomer($privatelink);
-            $this->sendNewOrderNoticeEmail();
+            $this->sendNewOrderNoticeEmail($wintracklink,$linenumber);
         }
 
         return $this;
@@ -971,7 +1000,7 @@ class Webqem_Mailcall_Model_Carrier_Timeslots extends Mage_Shipping_Model_Carrie
     
     protected function _trackingErrTips(){
         $result = Mage::getModel('shipping/tracking_result');
-        $errorTitle = Mage::helper('webqemmailcall')->__('Want it now');
+        $errorTitle = Mage::helper('webqemmailcall')->__('WantItNow');
         
         $error = Mage::getModel('shipping/tracking_result_error');
         $error->setCarrier($this->_code);

@@ -79,7 +79,7 @@ class Webqem_Mailcall_Block_Adminhtml_Timeslot_Edit_Tab_Form extends Mage_Core_B
 	 		}
 	 	
 	 	}
-	 	$html = "<select name='timeslot_day' class='timeslot_day'>";
+	 	$html = "<select name='timeslot_day' class='timeslot_day required-entry'>";
 	 	foreach ($arrData as $k=>$v) {
 	 		if (Mage::registry('timeslot_data')->getNumberDay() == $k) {
 	 			$html .= "<option value='$k' selected='selected'>$v</option>";

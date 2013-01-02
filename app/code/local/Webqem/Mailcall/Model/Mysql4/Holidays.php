@@ -8,6 +8,7 @@ class Webqem_Mailcall_Model_Mysql4_Holidays extends Mage_Core_Model_Mysql4_Abstr
 	 * @var int
 	 */
 	protected $_importedRows        = 0;
+	protected $_importErrors;
 	
     public function _construct()
     {

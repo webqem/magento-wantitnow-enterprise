@@ -5,7 +5,7 @@ class Webqem_Mailcall_Adminhtml_TimeslotController extends Mage_Adminhtml_Contro
 
 	protected function _initAction() {
 		$this->loadLayout()
-			->_setActiveMenu('webqemmailcall/items')
+			->_setActiveMenu('webqemall/items')
 			->_addBreadcrumb(Mage::helper('adminhtml')->__('Items Manager'), Mage::helper('adminhtml')->__('Item Manager'));
 		
 		return $this;
@@ -33,7 +33,7 @@ class Webqem_Mailcall_Adminhtml_TimeslotController extends Mage_Adminhtml_Contro
 				Mage::register('timeslot_edit_data', $collectionTimeslot);
 			}
 			$this->loadLayout();
-			$this->_setActiveMenu('webqemmailcall/items');
+			$this->_setActiveMenu('webqemall/items');
 
 			$this->_addBreadcrumb(Mage::helper('adminhtml')->__('Item Manager'), Mage::helper('adminhtml')->__('Item Manager'));
 			$this->_addBreadcrumb(Mage::helper('adminhtml')->__('Item News'), Mage::helper('adminhtml')->__('Item News'));

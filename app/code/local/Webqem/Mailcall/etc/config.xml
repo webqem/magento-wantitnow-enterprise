@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Webqem_Mailcall>
-            <version>1.9.2</version>
+            <version>1.0.0</version>
             <depends>
                 <Mage_Shipping />
             </depends>
@@ -49,11 +49,11 @@
     <adminhtml>
        <menu>
             <webqemall>
-            	<title>Webqem</title>
-				<sort_order>71</sort_order>     
+            	<title>WantItNow</title>
+		<sort_order>71</sort_order>     
                 <children>
                     <mailcall translate="title" module="webqemmailcall">
-                        <title>Manage Timeslot</title>
+                        <title>Manage Timeslots</title>
                         <sort_order>1</sort_order>
                         <action>webqemmailcall/adminhtml_timeslot</action>
                     </mailcall>
@@ -122,6 +122,9 @@
                     <holidays>
                         <table>webqem_holidays</table>
                     </holidays>
+                    <request>
+                        <table>webqem_request</table>
+                    </request>
                 </entities>
             </webqemmailcall_mysql4>
         </models>
@@ -214,10 +217,27 @@
                 <observers>
                     <webqemmailcall_observer>
                         <class>webqemmailcall/observer</class>
-                        <method>requestBookToMailcall</method>
+                        <method>saveRequestBook</method>
                     </webqemmailcall_observer>
                 </observers>
             </checkout_type_onepage_save_order>
+            <!--Commented Out By Steve G @ webqem 06/12/2012
+            <sales_order_save_after>
+                <observers>
+                    <webqemmailcall_observer_request>
+                        <class>webqemmailcall/observer</class>
+                        <method>requestBookToMailcall</method>
+                    </webqemmailcall_observer_request>
+                </observers>
+            </sales_order_save_after>-->
+            <sales_order_place_after>
+                <observers>
+                    <webqemmailcall_observer_request>
+                        <class>webqemmailcall/observer</class>
+                        <method>requestBookToMailcall</method>
+                    </webqemmailcall_observer_request>
+                </observers>
+            </sales_order_place_after>
 			<adminhtml_block_salesrule_actions_prepareform>
 				<observers>
                     <webqemmailcall_observer>

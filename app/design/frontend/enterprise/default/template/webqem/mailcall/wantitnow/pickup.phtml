@@ -12,11 +12,40 @@
 		$pickupData['name'] = '';
 	}
 ?>
+<style type="text/css">
+	#wantitnow_phone_wrapper{
+		overflow:hidden;
+	}
+	#wantitnow_phone_wrapper label, #wantitnow_phone_wrapper span{float:left;} 
+	#wantitnow_sms{margin-left:10px;}
+</style>
+<script type="text/javascript">
+	var countMailcallSms = 0;
+	jQuery('#shipping_form_webqemmailcall_webqemmailcall input:checkbox').each(function (index) {
+		 if(jQuery(this).is(':checked')) {
+			 countMailcallSms++;
+		 }
+	});
+	jQuery('#shipping_form_webqemmailcall_webqemmailcall input:checkbox').click(
+		 function(e){
+		    if(jQuery(this).is(':checked')) {
+		    	countMailcallSms++;
+		    } else {
+		    	countMailcallSms--;
+		    }
+		    if (countMailcallSms>0) {
+				jQuery('#wantitnow_phone_wrapper').show();
+		    } else {
+		    	jQuery('#wantitnow_phone_wrapper').hide();
+		    }
+		 }
+	);
+</script>
 <ul id="shipping_form_<?php echo $_rate->getCode() ?>" style="display:none;">
  	<?php if($this->getConfigData('dispatch_sms')):?>
     <li>
     	<span class="input-box">
-            <input type="checkbox" value="1" name="shipping_pickup[sms_dispatched]" />
+            <input type="checkbox" value="1" name="shipping_pickup[sms_dispatched]" checked/>
         </span>
         <label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('SMS when my package is dispatched') ?></label>
         
@@ -25,9 +54,19 @@
    	<?php if($this->getConfigData('delivery_sms')):?>
      <li>
      	<span class="input-box">
-        	<input type="checkbox" value="1" name="shipping_pickup[sms_time_away]" />
+        	<input type="checkbox" value="1" name="shipping_pickup[sms_time_away]" checked/>
         </span>
         <label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('SMS when my package is 20 minutes away') ?></label>
     </li>
+    <?php endif;?>
+    <?php if($this->getConfigData('dispatch_sms') || $this->getConfigData('delivery_sms')):?>
+    <!--<li id="wantitnow_phone_wrapper" style="display:none;">-->
+    <!--Commented out by Steve G @ webqem 06/12/2012-->
+    <li id="wantitnow_phone_wrapper">
+     	<label for="<?php echo $_code ?>_store" class="required"><?php echo $this->__('Phone Number') ?></label>
+     	<span class="input-box">
+        	<input type="text" value="<?php echo $this->getAddress()->getTelephone()?>" name="shipping_pickup[phone_number]" class="required-entry input-text" id="wantitnow_sms"/>
+        </span>
+    </li>	
     <?php endif;?>
 </ul>
